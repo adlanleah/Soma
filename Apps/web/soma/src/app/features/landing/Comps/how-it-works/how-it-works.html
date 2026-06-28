@@ -1,0 +1,79 @@
+ <section id="how-it-works" class="relative py-20 md:py-32">
+      <div class="mx-auto max-w-7xl px-6">
+
+        <!-- How it works -->
+        <div class="mb-32">
+          <div class="mx-auto mb-16 max-w-2xl text-center">
+            <p class="mb-4 text-sm font-medium text-primary">Simple Process</p>
+            <h2 class="mb-4 text-balance text-3xl font-bold tracking-tight text-base-content md:text-4xl">
+              How UgLearner works
+            </h2>
+            <p class="text-pretty text-base-content/60">
+              From content upload to student learning in four simple steps.
+            </p>
+          </div>
+
+          <div class="relative">
+            <!-- Vertical connection line -->
+            <div class="absolute left-8 top-0 bottom-0 hidden w-px bg-base-300 md:left-1/2 md:block"></div>
+
+            <div class="space-y-8 md:space-y-0">
+              @for (step of steps(); track step.number; let index = $index) {
+                <div
+                  class="relative flex flex-col gap-8 md:gap-16"
+                  [class.md:flex-row]="index % 2 === 0"
+                  [class.md:flex-row-reverse]="index % 2 === 1"
+                >
+                  <!-- Content card -->
+                  <div class="flex-1" [class.md:text-right]="index % 2 === 0">
+                    <div
+                      class="card bg-base-200 border border-base-300 text-left"
+                      [class.md:ml-auto]="index % 2 === 0"
+                    >
+                      <div class="card-body md:p-8">
+                        <div class="mb-2 text-4xl font-bold text-primary/30">{{ step.number }}</div>
+                        <h3 class="card-title text-base-content">{{ step.title }}</h3>
+                        <p class="text-base-content/60">{{ step.description }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Center dot -->
+                  <div class="absolute left-8 top-8 hidden h-4 w-4 -translate-x-1/2 rounded-full bg-primary md:left-1/2 md:block"></div>
+
+                  <!-- Spacer -->
+                  <div class="hidden flex-1 md:block"></div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Age-adaptive learning -->
+        <div>
+          <div class="mx-auto mb-16 max-w-2xl text-center">
+            <p class="mb-4 text-sm font-medium text-accent">Age-Adaptive AI</p>
+            <h2 class="mb-4 text-balance text-3xl font-bold tracking-tight text-base-content md:text-4xl">
+              Learning that grows with students
+            </h2>
+            <p class="text-pretty text-base-content/60">
+              Our AI automatically adjusts content complexity, language, and teaching style based on the student's age tier.
+            </p>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            @for (tier of ageTiers(); track tier.range) {
+              <div class="card bg-base-200 border border-base-300 transition-all hover:border-primary/30 overflow-hidden">
+                <div class="card-body">
+                  <div class="mb-4 h-1 w-12 rounded-full" [class]="tier.color"></div>
+                  <div class="mb-1 text-lg font-bold text-base-content">{{ tier.range }}</div>
+                  <div class="mb-3 text-sm font-medium text-primary">{{ tier.style }}</div>
+                  <p class="text-sm text-base-content/60">{{ tier.description }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+      </div>
+    </section>

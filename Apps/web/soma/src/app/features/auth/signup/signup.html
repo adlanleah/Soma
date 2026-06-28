@@ -1,0 +1,342 @@
+<div class="flex min-h-screen bg-base-100">
+
+  <!-- Left side - Branding -->
+  <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-base-200 p-12 lg:flex">
+    <!-- Background blobs -->
+    <div class="pointer-events-none absolute inset-0">
+      <div class="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
+      <div class="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-accent/10 blur-3xl"></div>
+    </div>
+
+    <!-- Logo -->
+    <a routerLink="/" class="relative z-10 flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary">
+        <svg lucideBookOpenIcon class="h-5 w-5 text-primary-content"></svg>
+      </div>
+      <span class="text-2xl font-bold text-base-content">UgLearner</span>
+    </a>
+
+    <!-- Main content -->
+    <div class="relative z-10 space-y-8">
+      <div class="space-y-4">
+        <h1 class="text-4xl font-bold leading-tight text-base-content">
+          Start Your
+          <span class="text-primary"> Learning Journey</span>
+        </h1>
+        <p class="max-w-md text-lg text-base-content/60">
+          Join UgLearner to experience AI-powered visual learning that adapts to every student's needs.
+        </p>
+      </div>
+
+      <!-- Features list -->
+      <div class="space-y-4">
+        @for (feature of features; track feature) {
+          <div class="flex items-center gap-3">
+            <div class="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20">
+              <svg lucideCheckIcon class="h-3.5 w-3.5 text-primary"></svg>
+            </div>
+            <span class="text-base-content">{{ feature }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- School partners -->
+    <div class="relative z-10">
+      <p class="mb-4 text-sm text-base-content/60">Trusted by leading schools</p>
+      <div class="flex items-center gap-6">
+        @for (i of [1,2,3,4]; track i) {
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-base-300">
+            <svg lucideBuilding2Icon class="h-5 w-5 text-base-content/40"></svg>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Right side - Signup form -->
+  <div class="flex w-full items-center justify-center p-6 lg:w-1/2">
+    <div class="card w-full max-w-md border border-base-300/50 bg-base-200/80 backdrop-blur-sm">
+      <div class="card-body">
+
+        <!-- Mobile logo -->
+        <a routerLink="/" class="mb-4 flex items-center gap-2 lg:hidden">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
+            <svg lucideBookOpenIcon class="h-5 w-5 text-primary-content" />
+          </div>
+          <span class="text-xl font-semibold text-base-content">UgLearner</span>
+        </a>
+
+        <!-- Back button -->
+        @if (step() === 2) {
+          <button
+            (click)="goBack()"
+            class="mb-2 flex items-center gap-1 text-sm text-base-content/60 hover:text-base-content transition-colors"
+          >
+            <svg lucideArrowLeftIcon class="h-4 w-4"></svg>
+            Change role
+          </button>
+        }
+
+        <!-- Header -->
+        <h2 class="card-title text-2xl font-bold text-base-content">
+          {{ step() === 1 ? 'Create your account' : 'Sign up as ' + selectedRole() }}
+        </h2>
+        <p class="text-sm text-base-content/60 mb-2">
+          {{ step() === 1 ? 'Select your role to get started' : 'Fill in your details to join UgLearner' }}
+        </p>
+
+        <!-- Progress bar -->
+        <div class="flex gap-2 mb-4">
+          <div class="h-1 flex-1 rounded-full"
+            [class.bg-primary]="step() >= 1"
+            [class.bg-base-300]="step() < 1">
+          </div>
+          <div class="h-1 flex-1 rounded-full"
+            [class.bg-primary]="step() >= 2"
+            [class.bg-base-300]="step() < 2">
+          </div>
+        </div>
+
+        <!-- STEP 1: Role Selection -->
+        @if (step() === 1) {
+          <div class="space-y-4">
+            @for (role of roles; track role) {
+              <button
+                (click)="selectRole(role)"
+                class="group flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all hover:border-primary/50 hover:bg-base-300/50"
+                [class.border-primary]="selectedRole() === role"
+                [class.bg-primary/10]="selectedRole() === role"
+                [class.border-base-300]="selectedRole() !== role"
+              >
+                <div
+                  class="flex h-12 w-12 items-center justify-center rounded-lg transition-colors"
+                  [class.bg-primary]="selectedRole() === role"
+                  [class.text-primary-content]="selectedRole() === role"
+                  [class.bg-base-300]="selectedRole() !== role"
+                  [class.text-base-content]="selectedRole() !== role"
+                >
+                  <svg [lucideIcon]="roleConfig[role].icon" class="h-5 w-5"></svg>
+                </div>
+                <div class="flex-1">
+                  <p class="font-semibold text-base-content">{{ roleConfig[role].label }}</p>
+                  <p class="text-sm text-base-content/60">{{ roleConfig[role].description }}</p>
+                </div>
+              </button>
+            }
+
+            <p class="pt-4 text-center text-sm text-base-content/60">
+              Already have an account?
+              <a routerLink="/login" class="font-medium text-primary hover:underline ml-1">Sign in</a>
+            </p>
+          </div>
+        }
+
+        <!-- STEP 2: Registration Form -->
+        @if (step() === 2) {
+          <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="space-y-4">
+
+            <!-- Name fields -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="label"><span class="label-text">First name</span></label>
+                <input
+                  type="text"
+                  formControlName="firstName"
+                  placeholder="John"
+                  class="input input-bordered w-full"
+                  [class.input-error]="isFieldInvalid('firstName')"
+                />
+                @if (isFieldInvalid('firstName')) {
+                  <span class="text-error text-xs mt-1 block">First name is required</span>
+                }
+              </div>
+              <div>
+                <label class="label"><span class="label-text">Last name</span></label>
+                <input
+                  type="text"
+                  formControlName="lastName"
+                  placeholder="Doe"
+                  class="input input-bordered w-full"
+                  [class.input-error]="isFieldInvalid('lastName')"
+                />
+                @if (isFieldInvalid('lastName')) {
+                  <span class="text-error text-xs mt-1 block">Last name is required</span>
+                }
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label class="label"><span class="label-text">Email address</span></label>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="you@school.edu"
+                class="input input-bordered w-full"
+                [class.input-error]="isFieldInvalid('email')"
+              />
+              @if (isFieldInvalid('email')) {
+                <span class="text-error text-xs mt-1 block">Valid email is required</span>
+              }
+            </div>
+
+            <!-- School Code -->
+            <div>
+              <label class="label"><span class="label-text">School code</span></label>
+              <input
+                type="text"
+                formControlName="schoolCode"
+                placeholder="Enter your school's code"
+                class="input input-bordered w-full"
+                [class.input-error]="isFieldInvalid('schoolCode')"
+              />
+              <span class="text-xs text-base-content/40 mt-1 block">Contact your school administrator for this code</span>
+            </div>
+
+            <!-- Student fields -->
+            @if (selectedRole() === 'student') {
+              <div>
+                <label class="label"><span class="label-text">Grade level</span></label>
+                <select
+                  formControlName="grade"
+                  class="select select-bordered w-full"
+                  [class.select-error]="isFieldInvalid('grade')"
+                >
+                  <option value="" disabled selected>Select your grade</option>
+                  @for (grade of grades; track grade.value) {
+                    <option [value]="grade.value">{{ grade.label }}</option>
+                  }
+                </select>
+              </div>
+              <div>
+                <label class="label"><span class="label-text">Age group</span></label>
+                <select
+                  formControlName="ageGroup"
+                  class="select select-bordered w-full"
+                  [class.select-error]="isFieldInvalid('ageGroup')"
+                >
+                  <option value="" disabled selected>Select your age group</option>
+                  @for (age of ageGroups; track age.value) {
+                    <option [value]="age.value">{{ age.label }}</option>
+                  }
+                </select>
+              </div>
+            }
+
+            <!-- Parent fields -->
+            @if (selectedRole() === 'parent') {
+              <div>
+                <label class="label"><span class="label-text">Child's student code</span></label>
+                <input
+                  type="text"
+                  formControlName="childCode"
+                  placeholder="Enter your child's student code"
+                  class="input input-bordered w-full"
+                  [class.input-error]="isFieldInvalid('childCode')"
+                />
+                <span class="text-xs text-base-content/40 mt-1 block">Your child's teacher can provide this code</span>
+              </div>
+            }
+
+            <!-- Teacher subject checkboxes -->
+            @if (selectedRole() === 'teacher') {
+              <div formGroupName="subjects">
+                <label class="label"><span class="label-text">Primary subjects</span></label>
+                <div class="grid grid-cols-2 gap-2">
+                  @for (subject of subjects; track subject) {
+                    <label
+                      class="flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors"
+                      [class.border-primary]="isSubjectSelected(subject)"
+                      [class.bg-primary/10]="isSubjectSelected(subject)"
+                      [class.border-base-300]="!isSubjectSelected(subject)"
+                    >
+                      <input
+                        type="checkbox"
+                        class="checkbox checkbox-primary checkbox-sm"
+                        [formControlName]="subject"
+                      />
+                      {{ subject }}
+                    </label>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Password -->
+            <div>
+              <label class="label"><span class="label-text">Password</span></label>
+              <div class="relative">
+                <input
+                  [type]="showPassword() ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Create a strong password"
+                  class="input input-bordered w-full pr-10"
+                  [class.input-error]="isFieldInvalid('password')"
+                />
+                <button
+                  type="button"
+                  (click)="showPassword.set(!showPassword())"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                >
+                  <svg [lucideIcon]="showPassword() ? EyeOffIcon : EyeIcon" class="h-4 w-4"></svg>
+                </button>
+              </div>
+
+              <!-- Password strength bars -->
+              @if (passwordValue) {
+                <div class="mt-2 space-y-1">
+                  <div class="flex gap-1">
+                    @for (i of [0,1,2,3]; track i) {
+                      <div class="h-1 flex-1 rounded-full transition-all" [class]="strengthBarColor(i)"></div>
+                    }
+                  </div>
+                  <p class="text-xs text-base-content/60">
+                    Password strength: {{ passwordStrength > 0 ? strengthLabels[passwordStrength - 1] : 'Too weak' }}
+                  </p>
+                </div>
+              }
+            </div>
+
+            <!-- Terms checkbox -->
+            <div class="flex items-start gap-2">
+              <input
+                type="checkbox"
+                formControlName="agreeTerms"
+                class="checkbox checkbox-primary checkbox-sm mt-0.5"
+              />
+              <span class="text-sm text-base-content/60 leading-snug">
+                I agree to the
+                <a routerLink="/terms" class="text-primary hover:underline">Terms of Service</a>
+                and
+                <a routerLink="/privacy" class="text-primary hover:underline">Privacy Policy</a>
+              </span>
+            </div>
+
+            <!-- Submit button -->
+            <button
+              type="submit"
+              class="btn btn-primary w-full"
+              [disabled]="isLoading() || !agreeTermsValue"
+            >
+              @if (isLoading()) {
+                <span class="loading loading-spinner loading-sm"></span>
+                Creating account...
+              } @else {
+                Create Account
+              }
+            </button>
+
+            <p class="text-center text-sm text-base-content/60">
+              Already have an account?
+              <a routerLink="/login" class="font-medium text-primary hover:underline ml-1">Sign in</a>
+            </p>
+
+          </form>
+        }
+
+      </div>
+    </div>
+  </div>
+
+</div>
