@@ -1,1 +1,98 @@
-<p>dashboard works!</p>
+<div class="flex flex-col min-h-screen bg-base-100 text-base-content">
+  <header class="p-6 border-b border-base-300">
+    <h1 class="text-3xl font-bold">Welcome back, Parent</h1>
+    <p class="text-base-content/60">Monitor your children's learning progress</p>
+  </header>
+
+  <div class="flex-1 space-y-6 p-6">
+    
+    <div class="flex gap-3">
+  @for (child of children(); track child.id) {
+    <button
+      (click)="selectChild(child.id)"
+      class="flex items-center gap-3 rounded-xl border px-4 py-3 transition-all"
+      [class.border-primary]="selectedChildId() === child.id"
+      [class.bg-primary/10]="selectedChildId() === child.id"
+      [class.border-base-300]="selectedChildId() !== child.id"
+      [class.hover:border-primary/30]="selectedChildId() !== child.id"
+    >
+      <div
+        class="flex h-10 w-10 items-center justify-center rounded-full font-bold transition-colors"
+        [class.bg-primary]="selectedChildId() === child.id"
+        [class.text-white]="selectedChildId() === child.id"
+        [class.bg-base-300]="selectedChildId() !== child.id"
+        [class.text-base-content]="selectedChildId() !== child.id"
+      >
+        {{ child.avatar }}
+      </div>
+      <div class="text-left">
+        <p class="font-medium" [class.text-primary]="selectedChildId() === child.id">
+          {{ child.name }}
+        </p>
+        <p class="text-xs text-base-content/50">{{ child.grade }}</p>
+      </div>
+    </button>
+  }
+</div>
+
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div class="card bg-base-200 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/50">Completion</p>
+              <p class="text-3xl font-bold">{{activeChild().stats.completion}}%</p>
+            </div>
+            <div class="bg-primary/20 p-3 rounded-lg text-primary">
+              <svg lucideTarget class="h-6 w-6"></svg>
+            </div>
+          </div>
+          <progress class="progress progress-primary w-full mt-4" [value]="activeChild().stats.completion" max="100"></progress>
+        </div>
+      </div>
+
+      <div class="card bg-base-200 border border-base-300 shadow-sm">
+        <div class="card-body p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/50">Avg Score</p>
+              <p class="text-3xl font-bold">{{activeChild().stats.avgScore}}%</p>
+            </div>
+            <div class="bg-accent/20 p-3 rounded-lg text-accent">
+              <svg lucideTrendingUp class="h-6 w-6"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+      <div class="card bg-base-200 border border-base-300">
+        <div class="p-6 flex items-center justify-between border-b border-base-300/50">
+          <h2 class="font-bold text-lg">Recent Activity</h2>
+          <button class="btn btn-ghost btn-xs text-primary">View History</button>
+        </div>
+        <div class="p-4 space-y-3">
+          @for (act of activeChild().recentActivity; track $index) {
+            <div class="flex items-center justify-between p-4 bg-base-100 rounded-xl border border-base-300/50 hover:border-primary/50 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-2 rounded-lg text-primary">
+                  <svg lucideBookOpen class="h-5 w-5"></svg>
+                </div>
+                <div>
+                  <p class="font-medium text-sm">{{act.topic}}</p>
+                  <p class="text-xs text-base-content/50">{{act.subject}}</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-accent">{{act.score}}</p>
+                <p class="text-[10px] text-base-content/40">{{act.date}}</p>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
