@@ -18,12 +18,31 @@ import { FlagsModule } from './modules/flags/flags.module';
 import { AiModule } from './modules/ai/ai.module';
 import { HealthModule } from './modules/health/health.module';
 import { MasterPrismaService } from './database/master-prisma/master-prisma.service';
-import { TenantPrismaService } from './database/tenant-prisma/tenant-prisma.service';
 import { DatabaseModule } from './database/database.module';
+import { ConfigModule } from '@nestjs/config/dist/config.module';
 
 @Module({
-  imports: [AuthModule, SchoolsModule, UsersModule, TeachersModule, StudentsModule, ParentsModule, CohortsModule, CoursesModule, CurriculumModule, ContentModule, QuizzesModule, ProgressModule, NotificationsModule, FlagsModule, AiModule, HealthModule, DatabaseModule],
+  imports: [
+    AuthModule,
+    SchoolsModule,
+    UsersModule,
+    TeachersModule,
+    StudentsModule,
+    ParentsModule,
+    CohortsModule,
+    CoursesModule,
+    CurriculumModule,
+    ContentModule,
+    QuizzesModule,
+    ProgressModule,
+    NotificationsModule,
+    FlagsModule,
+    AiModule,
+    HealthModule,
+    DatabaseModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+  ],
   controllers: [AppController],
-  providers: [AppService, MasterPrismaService, TenantPrismaService],
+  providers: [AppService, MasterPrismaService],
 })
 export class AppModule {}

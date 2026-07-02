@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/tenant-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+  PARENT
+}
+
+model User {
+  id           String   @id @default(uuid())
+  firstName    String   @map("first_name")
+  lastName     String   @map("last_name")
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         UserRole
+  status       String   @default("pending")
+
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  parentLinks    ParentStudentLink[] @relation("ParentLinks")
+
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id          String   @id @default(uuid())
+  userId      String   @unique @map("user_id")
+  user        User     @relation(fields: [userId], references: [id])
+  grade       String
+  ageGroup    String   @map("age_group")
+  studentCode String   @unique @map("student_code")
+  classId     String?  @map("class_id")
+  class       Cohort?  @relation(fields: [classId], references: [id])
+
+  @@map("student_profiles")
+}
+
+model TeacherProfile {
+  id     String @id @default(uuid())
+  userId String @unique @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@map("teacher_profiles")
+}
+
+model ParentStudentLink {
+  id        String @id @default(uuid())
+  parentId  String @map("parent_id")
+  parent    User   @relation("ParentLinks", fields: [parentId], references: [id])
+  studentId String @map("student_id")
+
+  @@map("parent_student_links")
+}
+
+model Cohort {
+  id        String   @id @default(uuid())
+  name      String
+  endDate   DateTime @map("end_date")
+  students  StudentProfile[]
+  courses   Course[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("cohorts")
+}
+
+model Course {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  cohortId    String? @map("cohort_id")
+  cohort      Cohort? @relation(fields: [cohortId], references: [id])
+
+  @@map("courses")
+}

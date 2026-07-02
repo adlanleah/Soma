@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/master-client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum SchoolPlan {
+  STARTER
+  GROWTH
+  ENTERPRISE
+}
+
+enum SchoolStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum TenancyMode {
+  SCHEMA   // small schools share the master DB, isolated by schema
+  DATABASE // large schools get a fully separate database
+}
+
+model School {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  slug          String       @unique
+  schoolCode    String       @unique @map("school_code")
+  emailPrefix   String       @unique @map("email_prefix")
+
+  country       String
+  city          String
+  address       String
+  phone         String
+  website       String?
+
+  plan          SchoolPlan   @default(STARTER)
+  status        SchoolStatus @default(PENDING)
+
+  tenancyMode   TenancyMode  @default(SCHEMA) @map("tenancy_mode")
+  dbName        String?      @map("db_name")   // set if tenancyMode = DATABASE
+  schemaName    String       @map("schema_name") // set always, used if SCHEMA mode
+
+  adminFirstName String  @map("admin_first_name")
+  adminLastName  String  @map("admin_last_name")
+  adminEmail     String  @map("admin_email")
+  adminPhone     String  @map("admin_phone")
+
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+
+  @@map("schools")
+}
+
+model SuperAdmin {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("super_admins")
+}
