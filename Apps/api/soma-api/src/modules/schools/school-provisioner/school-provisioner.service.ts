@@ -19,7 +19,7 @@ export class SchoolProvisionerService {
    */
   async provisionSchema(schemaName: string): Promise<void> {
     const client = new Client({
-      connectionString: this.config.get('DATABASE_URL'),
+      connectionString: this.config.get<string>('DATABASE_URL'),
     });
     await client.connect();
     try {
@@ -29,12 +29,12 @@ export class SchoolProvisionerService {
       await client.end();
     }
 
-    await this.runTenantMigrations(schemaName, 'schema');
+    this.runTenantMigrations(schemaName, 'schema');
   }
 
   async provisionDatabase(dbName: string): Promise<void> {
     const client = new Client({
-      connectionString: this.config.get('POSTGRES_ADMIN_URL'),
+      connectionString: this.config.get<string>('POSTGRES_ADMIN_URL'),
     });
     await client.connect();
     try {
@@ -50,13 +50,10 @@ export class SchoolProvisionerService {
       await client.end();
     }
 
-    await this.runTenantMigrations(dbName, 'database');
+    this.runTenantMigrations(dbName, 'database');
   }
 
-  private async runTenantMigrations(
-    name: string,
-    mode: 'schema' | 'database',
-  ): Promise<void> {
+  private runTenantMigrations(name: string, mode: 'schema' | 'database'): void {
     const host = this.config.get<string>('POSTGRES_HOST');
     const port = this.config.get<string>('POSTGRES_PORT');
     const user = this.config.get<string>('POSTGRES_USER');
@@ -65,27 +62,19 @@ export class SchoolProvisionerService {
     const tenantUrl =
       mode === 'database'
         ? `postgresql://${user}:${pass}@${host}:${port}/${name}`
-        : `postgresql://${user}:${pass}@${host}:${port}/soma_master?schema=${name}`;
+        : `postgresql://${user}:${pass}@${host}:${port}/soma-master?schema=${name}`;
 
     const schemaPath = path.join(process.cwd(), 'prisma/tenant/schema.prisma');
+    const configPath = path.join(process.cwd(), 'prisma.tenant.config.ts');
 
     this.logger.log(`Running tenant migrations for ${name} (${mode})`);
 
-    await new Promise<void>((resolve, reject) => {
-      try {
-        execSync(`npx prisma db push --schema=${schemaPath} --skip-generate`, {
-          env: { ...process.env, TENANT_DATABASE_URL: tenantUrl },
-          stdio: 'inherit',
-        });
-        resolve();
-      } catch (error) {
-        // Ensure we reject with an Error object to satisfy lint rules
-        if (error instanceof Error) {
-          reject(error);
-        } else {
-          reject(new Error(String(error)));
-        }
-      }
-    });
+    execSync(
+      `npx prisma db push --schema="${schemaPath}" --config="${configPath}" --accept-data-loss`,
+      {
+        env: { ...process.env, TENANT_DATABASE_URL: tenantUrl },
+        stdio: 'inherit',
+      },
+    );
   }
 }

@@ -20,6 +20,8 @@ import { HealthModule } from './modules/health/health.module';
 import { MasterPrismaService } from './database/master-prisma/master-prisma.service';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config/dist/config.module';
+import { RolesGuard } from './common/guards/roles.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -43,6 +45,13 @@ import { ConfigModule } from '@nestjs/config/dist/config.module';
     ConfigModule.forRoot({ isGlobal: true }),
   ],
   controllers: [AppController],
-  providers: [AppService, MasterPrismaService],
+  providers: [
+    AppService,
+    MasterPrismaService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -14,6 +14,12 @@ enum UserRole {
   PARENT
 }
 
+enum AdminLevel {
+  PRINCIPAL   // Headteacher / Deputy — full access, only one that can invite other admins
+  STAFF       // Bursar / Secretary / IT Coordinator — manages users, cohorts, courses
+  ACADEMIC    // Director of Studies — manages curriculum, teacher assignments, analytics
+}
+
 model User {
   id           String   @id @default(uuid())
   firstName    String   @map("first_name")
@@ -23,6 +29,7 @@ model User {
   role         UserRole
   status       String   @default("pending")
 
+  adminProfile   AdminProfile?
   studentProfile StudentProfile?
   teacherProfile TeacherProfile?
   parentLinks    ParentStudentLink[] @relation("ParentLinks")
@@ -31,6 +38,19 @@ model User {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+model AdminProfile {
+  id         String     @id @default(uuid())
+  userId     String     @unique @map("user_id")
+  user       User       @relation(fields: [userId], references: [id])
+  adminLevel AdminLevel @map("admin_level")
+  title      String?    // e.g. "Headteacher", "Bursar", "Director of Studies"
+
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+
+  @@map("admin_profiles")
 }
 
 model StudentProfile {

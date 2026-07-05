@@ -35,7 +35,7 @@ export class SchoolsService {
   async create(dto: CreateSchoolDto) {
     const slug = this.slugify(dto.name);
     const emailPrefix = slug.replace(/-/g, '').slice(0, 20);
-    const schemaName = `school_${slug.replace(/-/g, '_')}`;
+    const dbName = `soma_${slug.replace(/-/g, '_')}`;
 
     const existing = await this.masterPrisma.school.findFirst({
       where: { OR: [{ name: dto.name }, { slug }, { emailPrefix }] },
@@ -45,11 +45,7 @@ export class SchoolsService {
     }
 
     const schoolCode = this.generateSchoolCode(dto.name);
-    const tenancyMode = dto.plan === 'STARTER' ? 'SCHEMA' : 'DATABASE';
-    const dbName =
-      tenancyMode === 'DATABASE' ? `soma_${slug.replace(/-/g, '_')}` : null;
 
-    // 1. Create the school record first, status PENDING
     const school = await this.masterPrisma.school.create({
       data: {
         name: dto.name,
@@ -63,9 +59,9 @@ export class SchoolsService {
         website: dto.website,
         plan: dto.plan,
         status: 'PENDING',
-        tenancyMode,
+        tenancyMode: 'DATABASE',
         dbName,
-        schemaName,
+        schemaName: 'public', // always public now — the DB itself is the isolation boundary
         adminFirstName: dto.adminFirstName,
         adminLastName: dto.adminLastName,
         adminEmail: dto.adminEmail,
@@ -73,21 +69,22 @@ export class SchoolsService {
       },
     });
 
-    // 2. Provision isolation — schema or full database
-    if (tenancyMode === 'DATABASE') {
-      await this.provisioner.provisionDatabase(dbName!);
-    } else {
-      await this.provisioner.provisionSchema(schemaName);
+    try {
+      await this.provisioner.provisionDatabase(dbName);
+    } catch (err) {
+      await this.masterPrisma.school.update({
+        where: { id: school.id },
+        data: { status: 'SUSPENDED' },
+      });
+      throw new BadRequestException(
+        `School record created but provisioning failed: ${err instanceof Error ? err.message : 'unknown error'}`,
+      );
     }
 
-    // 3. Mark active now that provisioning succeeded
     const activated = await this.masterPrisma.school.update({
       where: { id: school.id },
       data: { status: 'ACTIVE' },
     });
-
-    // TODO: dispatch invite email to adminEmail with schoolCode
-    // TODO: create first Admin user row inside the tenant DB/schema
 
     return {
       id: activated.id,
