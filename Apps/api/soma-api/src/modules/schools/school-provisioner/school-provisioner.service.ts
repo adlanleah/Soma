@@ -11,27 +11,9 @@ export class SchoolProvisionerService {
   constructor(private config: ConfigService) {}
 
   /**
-   * Creates isolation for a new school.
-   * SCHEMA mode (default/Starter plan): creates a Postgres schema inside
-   *   the master database — cheap, fast, good up to ~100 students.
-   * DATABASE mode (Growth/Enterprise): creates a fully separate database
-   *   — full isolation, used for bigger schools.
+   * Creates a fully isolated Postgres database for a new school and
+   * syncs the tenant schema (users, cohorts, courses, etc.) into it.
    */
-  async provisionSchema(schemaName: string): Promise<void> {
-    const client = new Client({
-      connectionString: this.config.get<string>('DATABASE_URL'),
-    });
-    await client.connect();
-    try {
-      await client.query(`CREATE SCHEMA IF NOT EXISTS "${schemaName}"`);
-      this.logger.log(`Schema "${schemaName}" created`);
-    } finally {
-      await client.end();
-    }
-
-    this.runTenantMigrations(schemaName, 'schema');
-  }
-
   async provisionDatabase(dbName: string): Promise<void> {
     const client = new Client({
       connectionString: this.config.get<string>('POSTGRES_ADMIN_URL'),
@@ -50,24 +32,21 @@ export class SchoolProvisionerService {
       await client.end();
     }
 
-    this.runTenantMigrations(dbName, 'database');
+    this.runTenantMigrations(dbName);
   }
 
-  private runTenantMigrations(name: string, mode: 'schema' | 'database'): void {
+  private runTenantMigrations(dbName: string): void {
     const host = this.config.get<string>('POSTGRES_HOST');
     const port = this.config.get<string>('POSTGRES_PORT');
     const user = this.config.get<string>('POSTGRES_USER');
     const pass = this.config.get<string>('POSTGRES_PASSWORD');
 
-    const tenantUrl =
-      mode === 'database'
-        ? `postgresql://${user}:${pass}@${host}:${port}/${name}`
-        : `postgresql://${user}:${pass}@${host}:${port}/soma-master?schema=${name}`;
+    const tenantUrl = `postgresql://${user}:${pass}@${host}:${port}/${dbName}`;
 
     const schemaPath = path.join(process.cwd(), 'prisma/tenant/schema.prisma');
     const configPath = path.join(process.cwd(), 'prisma.tenant.config.ts');
 
-    this.logger.log(`Running tenant migrations for ${name} (${mode})`);
+    this.logger.log(`Running tenant migrations for ${dbName}`);
 
     execSync(
       `npx prisma db push --schema="${schemaPath}" --config="${configPath}" --accept-data-loss`,

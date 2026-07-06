@@ -19,7 +19,8 @@ import { AiModule } from './modules/ai/ai.module';
 import { HealthModule } from './modules/health/health.module';
 import { MasterPrismaService } from './database/master-prisma/master-prisma.service';
 import { DatabaseModule } from './database/database.module';
-import { ConfigModule } from '@nestjs/config/dist/config.module';
+import { ConfigModule } from '@nestjs/config';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -50,7 +51,11 @@ import { APP_GUARD } from '@nestjs/core';
     MasterPrismaService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: JwtAuthGuard, // runs first — populates request.user
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // runs second — reads request.user safely
     },
   ],
 })
