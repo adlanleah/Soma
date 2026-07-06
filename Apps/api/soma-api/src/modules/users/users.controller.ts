@@ -8,6 +8,7 @@ import { UsersService } from './users.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CreateParentDto } from './dto/create-parent.dto';
+import { BulkImportDto } from './dto/bulk-import.dto';
 
 @UseGuards(JwtAuthGuard)
 @Roles('ADMIN')
@@ -43,5 +44,13 @@ export class UsersController {
   @Get()
   findAll(@CurrentUser() admin: jwtPayload.JwtPayload) {
     return this.usersService.findAll(admin);
+  }
+
+  @Post('bulk-import')
+  bulkImport(
+    @CurrentUser() admin: jwtPayload.JwtPayload,
+    @Body() dto: BulkImportDto,
+  ) {
+    return this.usersService.bulkImport(admin, dto);
   }
 }

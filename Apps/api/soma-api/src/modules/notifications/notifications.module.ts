@@ -7,6 +7,11 @@ import { WeeklySummaryService } from './weekly-summary/weekly-summary.service';
 
 @Module({
   controllers: [NotificationsController],
-  providers: [NotificationsService, EmailService, WhatsappService, WeeklySummaryService],
+  providers: [
+    NotificationsService,
+    EmailService,
+    WhatsappService,
+    WeeklySummaryService,
+  ],
 })
 export class NotificationsModule {}

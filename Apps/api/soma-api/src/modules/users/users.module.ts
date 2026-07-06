@@ -4,6 +4,7 @@ import { UsersController } from './users.controller';
 import { BulkImportService } from './bulk-import/bulk-import.service';
 import { MasterPrismaService } from '../../database/master-prisma/master-prisma.service';
 import { TenantConnectionService } from '../../database/tenant-connection/tenant-connection.service';
+import { EmailService } from '../notifications/email/email.service';
 
 @Module({
   controllers: [UsersController],
@@ -12,6 +13,7 @@ import { TenantConnectionService } from '../../database/tenant-connection/tenant
     BulkImportService,
     MasterPrismaService,
     TenantConnectionService,
+    EmailService,
   ],
 })
 export class UsersModule {}
