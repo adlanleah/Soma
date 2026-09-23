@@ -15,3 +15,11 @@ class TutorQueryResponse(BaseModel):
     sources_used: int
     flagged: bool
     flag_reason: Optional[str] = None
+
+class TutorQueryRequest(BaseModel):
+    school_code: str
+    student_id: str
+    course_resource_ids: list[str]
+    age_group: str
+    question: str
+    is_within_access_window: bool  # ← NestJS checks the schedule, passes this flag

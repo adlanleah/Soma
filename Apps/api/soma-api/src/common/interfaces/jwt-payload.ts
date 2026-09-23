@@ -1,7 +1,7 @@
 export interface JwtPayload {
   sub: string; // userId
   email: string;
-  role: 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT';
+  role: 'SUPER_ADMIN' | 'ADMIN' | 'TEACHER' | 'STUDENT' | 'PARENT';
   adminLevel?: 'PRINCIPAL' | 'STAFF' | 'ACADEMIC';
   schoolCode: string;
   schemaName: string;

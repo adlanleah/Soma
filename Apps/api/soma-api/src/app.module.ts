@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+
 import { AuthModule } from './modules/auth/auth.module';
 import { SchoolsModule } from './modules/schools/schools.module';
 import { UsersModule } from './modules/users/users.module';
@@ -17,15 +22,28 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { FlagsModule } from './modules/flags/flags.module';
 import { AiModule } from './modules/ai/ai.module';
 import { HealthModule } from './modules/health/health.module';
-import { MasterPrismaService } from './database/master-prisma/master-prisma.service';
+
 import { DatabaseModule } from './database/database.module';
-import { ConfigModule } from '@nestjs/config';
+import { MasterPrismaService } from './database/master-prisma/master-prisma.service';
+
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
-import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
+
+    DatabaseModule,
+
     AuthModule,
     SchoolsModule,
     UsersModule,
@@ -42,20 +60,27 @@ import { APP_GUARD } from '@nestjs/core';
     FlagsModule,
     AiModule,
     HealthModule,
-    DatabaseModule,
-    ConfigModule.forRoot({ isGlobal: true }),
   ],
+
   controllers: [AppController],
+
   providers: [
     AppService,
     MasterPrismaService,
+
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // runs first — populates request.user
+      useClass: ThrottlerGuard,
     },
+
     {
       provide: APP_GUARD,
-      useClass: RolesGuard, // runs second — reads request.user safely
+      useClass: JwtAuthGuard,
+    },
+
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

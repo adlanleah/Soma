@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { MasterPrismaService } from '../../database/master-prisma/master-prisma.service';
 import { TenantConnectionService } from '../../database/tenant-connection/tenant-connection.service';
 import { LoginDto } from './dto/login.dto';
+import { SuperAdminLoginDto } from './dto/super-admin-login.dto';
 import { JwtPayload } from '../../common/interfaces/jwt-payload';
 
 @Injectable()
@@ -102,5 +103,47 @@ export class AuthService {
     }
 
     return payload;
+  }
+
+  async superAdminLogin(dto: SuperAdminLoginDto) {
+    const superAdmin = await this.masterPrisma.superAdmin.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!superAdmin) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const passwordValid = await bcrypt.compare(
+      dto.password,
+      superAdmin.passwordHash,
+    );
+    if (!passwordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload: JwtPayload = {
+      sub: superAdmin.id,
+      email: superAdmin.email,
+      role: 'SUPER_ADMIN',
+      schoolCode: '', // super admin isn't scoped to a school
+      schemaName: '',
+      dbName: null,
+      tenancyMode: 'DATABASE',
+    };
+
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    return {
+      accessToken,
+      refreshToken,
+      user: {
+        id: superAdmin.id,
+        name: superAdmin.name,
+        email: superAdmin.email,
+        role: 'SUPER_ADMIN',
+      },
+    };
   }
 }
