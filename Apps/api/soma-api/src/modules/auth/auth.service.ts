@@ -85,7 +85,36 @@ export class AuthService {
     };
   }
 
+  // async validateUserFromPayload(payload: JwtPayload) {
+  //   if (!payload.dbName) {
+  //     throw new UnauthorizedException('Invalid token payload');
+  //   }
+
+  //   const tenantClient = this.tenantConnection.getClient({
+  //     dbName: payload.dbName,
+  //   });
+
+  //   const user = await tenantClient.user.findUnique({
+  //     where: { id: payload.sub },
+  //   });
+
+  //   if (!user || user.status !== 'active') {
+  //     throw new UnauthorizedException('User no longer valid');
+  //   }
+
+  //   return payload;
+  // }
+
   async validateUserFromPayload(payload: JwtPayload) {
+    // Super Admins live in the master DB, not in any school's tenant DB
+    if (payload.role === 'SUPER_ADMIN') {
+      const superAdmin = await this.masterPrisma.superAdmin.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!superAdmin) throw new UnauthorizedException('User no longer valid');
+      return payload;
+    }
+
     if (!payload.dbName) {
       throw new UnauthorizedException('Invalid token payload');
     }
@@ -93,7 +122,6 @@ export class AuthService {
     const tenantClient = this.tenantConnection.getClient({
       dbName: payload.dbName,
     });
-
     const user = await tenantClient.user.findUnique({
       where: { id: payload.sub },
     });
@@ -101,8 +129,54 @@ export class AuthService {
     if (!user || user.status !== 'active') {
       throw new UnauthorizedException('User no longer valid');
     }
-
     return payload;
+  }
+
+  async getProfile(payload: JwtPayload) {
+    if (payload.role === 'SUPER_ADMIN') {
+      const sa = await this.masterPrisma.superAdmin.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!sa) throw new UnauthorizedException();
+      const [firstName, ...rest] = sa.name.split(' ');
+      return {
+        user: {
+          id: sa.id,
+          firstName,
+          lastName: rest.join(' '),
+          email: sa.email,
+          role: 'SUPER_ADMIN' as const,
+          adminLevel: null,
+        },
+        school: null,
+      };
+    }
+
+    const school = await this.masterPrisma.school.findUnique({
+      where: { schoolCode: payload.schoolCode },
+    });
+    if (!school || !school.dbName) throw new UnauthorizedException();
+
+    const tenantClient = this.tenantConnection.getClient({
+      dbName: school.dbName,
+    });
+    const user = await tenantClient.user.findUnique({
+      where: { id: payload.sub },
+      include: { adminProfile: true },
+    });
+    if (!user) throw new UnauthorizedException();
+
+    return {
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        adminLevel: user.adminProfile?.adminLevel ?? null,
+      },
+      school: { name: school.name, schoolCode: school.schoolCode },
+    };
   }
 
   async superAdminLogin(dto: SuperAdminLoginDto) {

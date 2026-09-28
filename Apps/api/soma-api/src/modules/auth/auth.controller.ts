@@ -27,6 +27,6 @@ export class AuthController {
 
   @Get('me')
   me(@CurrentUser() user: jwtPayload.JwtPayload) {
-    return user;
+    return this.authService.getProfile(user);
   }
 }

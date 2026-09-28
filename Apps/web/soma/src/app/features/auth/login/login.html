@@ -1,194 +1,342 @@
 <div class="flex min-h-screen bg-base-100">
 
   <!-- Left side - Branding -->
-  <div class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-base-200 p-12 lg:flex">
+  <div
+    class="relative hidden w-1/2 flex-col justify-between overflow-hidden bg-base-200 p-12 lg:flex"
+  >
     <!-- Background blobs -->
     <div class="pointer-events-none absolute inset-0">
-      <div class="absolute -top-24 -left-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl"></div>
-      <div class="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-accent/10 blur-3xl"></div>
+      <div
+        class="absolute -left-24 -top-24 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+      ></div>
+
+      <div
+        class="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
+      ></div>
     </div>
 
     <!-- Logo -->
-    <a routerLink="/" class="relative z-10 flex items-center gap-3">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary">
-        <svg lucideBookOpenIcon class="h-5 w-5 text-primary-content"></svg>
+    <a
+      routerLink="/"
+      class="relative z-10 flex items-center gap-3"
+    >
+      <div
+        class="flex h-11 w-11 items-center justify-center rounded-xl bg-primary"
+      >
+        <svg
+          lucideBookOpenIcon
+          class="h-5 w-5 text-primary-content"
+        ></svg>
       </div>
-      <span class="text-2xl font-bold text-base-content">UgLearner</span>
+
+      <span class="text-2xl font-bold text-base-content">
+        Soma
+      </span>
     </a>
 
     <!-- Main content -->
     <div class="relative z-10 space-y-6">
-      <h1 class="text-4xl font-bold leading-tight text-base-content">
-        Transform Learning with
-        <span class="text-primary"> Visual AI</span>
-      </h1>
-      <p class="max-w-md text-lg text-base-content/60">
-        Join thousands of educators and students using AI-powered visual learning to enhance comprehension and engagement.
-      </p>
+      @if (isSuperAdmin) {
+        <div class="space-y-6">
+          <h1
+            class="text-4xl font-bold leading-tight text-base-content"
+          >
+            Manage Learning
+            <span class="text-primary"> at Scale</span>
+          </h1>
 
-      <!-- Stats -->
-      <div class="flex gap-8 pt-4">
-        @for (stat of stats; track stat.label) {
-          <div>
-            <p class="text-3xl font-bold text-base-content">{{ stat.value }}</p>
-            <p class="text-sm text-base-content/60">{{ stat.label }}</p>
-          </div>
-        }
-      </div>
-    </div>
-
-    <!-- Testimonial -->
-    <div class="relative z-10 rounded-xl border border-base-300/50 bg-base-100/50 p-6 backdrop-blur-sm">
-      <p class="text-base-content italic">
-        "UgLearner has completely transformed how I teach complex concepts. My students are more engaged than ever."
-      </p>
-      <div class="mt-4 flex items-center gap-3">
-        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 text-primary font-semibold">
-          SM
+          <p class="max-w-md text-lg text-base-content/60">
+            Manage schools, users, learning content, and the Soma
+            platform from one central administration portal.
+          </p>
         </div>
-        <div>
-          <p class="font-medium text-base-content">Sarah Mitchell</p>
-          <p class="text-sm text-base-content/60">Science Teacher, Lincoln High</p>
-        </div>
-      </div>
-    </div>
-  </div>
+      } @else {
+        <div class="space-y-6">
+          <h1
+            class="text-4xl font-bold leading-tight text-base-content"
+          >
+            Transform Learning with
+            <span class="text-primary"> AI</span>
+          </h1>
 
-  <!-- Right side - Login form -->
-  <div class="flex w-full items-center justify-center p-6 lg:w-1/2">
-    <div class="card w-full max-w-md border border-base-300/50 bg-base-200/80 backdrop-blur-sm">
-      <div class="card-body">
+          <p class="max-w-md text-lg text-base-content/60">
+            Help students understand their school materials with
+            AI-powered explanations, lessons, quizzes, and learning
+            support.
+          </p>
 
-        <!-- Mobile logo -->
-        <a routerLink="/" class="mb-4 flex items-center gap-2 lg:hidden">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <svg lucideBookOpenIcon class="h-5 w-5 text-primary-content"></svg>
-          </div>
-          <span class="text-xl font-semibold text-base-content">UgLearner</span>
-        </a>
+          <!-- Stats -->
+          <div class="flex gap-8 pt-4">
+            @for (stat of stats; track stat.label) {
+              <div>
+                <p class="text-3xl font-bold text-base-content">
+                  {{ stat.value }}
+                </p>
 
-        <h2 class="card-title text-2xl font-bold text-base-content">Welcome back</h2>
-        <p class="text-sm text-base-content/60 mb-4">Sign in to continue your learning journey</p>
-
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-5">
-
-          <!-- Role selection -->
-          <div class="space-y-3">
-            <label class="label"><span class="label-text">I am a</span></label>
-            <div class="grid grid-cols-2 gap-2">
-              @for (role of mainRoles; track role) {
-                <button
-                  type="button"
-                  (click)="selectRole(role)"
-                  class="group flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all"
-                  [class.border-primary]="selectedRole() === role"
-                  [class.bg-primary/10]="selectedRole() === role"
-                  [class.text-base-content]="selectedRole() === role"
-                  [class.border-base-300]="selectedRole() !== role"
-                  [class.bg-base-300/30]="selectedRole() !== role"
-                  [class.text-base-content/60]="selectedRole() !== role"
-                >
-                  <svg
-                    [lucideIcon]="roleConfig[role].icon"
-                    class="h-4 w-4"
-                    [class.text-primary]="selectedRole() === role"
-                    [class.text-base-content/40]="selectedRole() !== role"
-                    ></svg>
-                  <span class="font-medium">{{ roleConfig[role].label }}</span>
-                </button>
-              }
-            </div>
-
-            <!-- Admin toggle -->
-            <button
-              type="button"
-              (click)="toggleAdminOptions()"
-              class="text-xs text-base-content/40 hover:text-primary transition-colors"
-            >
-              {{ (selectedRole() === 'admin' || selectedRole() === 'superadmin') ? 'Hide admin options' : 'Admin login' }}
-            </button>
-
-            <!-- Admin role options -->
-            @if (showAdminOptions() || selectedRole() === 'admin' || selectedRole() === 'superadmin') {
-              <div class="grid grid-cols-2 gap-2">
-                @for (role of adminRoles; track role) {
-                  <button
-                    type="button"
-                    (click)="selectRole(role)"
-                    class="group flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-all"
-                    [class.border-primary]="selectedRole() === role"
-                    [class.bg-primary/10]="selectedRole() === role"
-                    [class.text-base-content]="selectedRole() === role"
-                    [class.border-base-300]="selectedRole() !== role"
-                    [class.bg-base-300/30]="selectedRole() !== role"
-                    [class.text-base-content/60]="selectedRole() !== role"
-                  >
-                    <svg
-                        [lucideIcon]="roleConfig[role].icon"
-                        class="h-4 w-4"
-                        [class.text-primary]="selectedRole() === role"
-                        [class.text-base-content/40]="selectedRole() !== role"
-                        ></svg>
-                    <span class="font-medium">{{ roleConfig[role].label }}</span>
-                  </button>
-                }
+                <p class="text-sm text-base-content/60">
+                  {{ stat.label }}
+                </p>
               </div>
             }
           </div>
+        </div>
+      }
+    </div>
+
+    <!-- Testimonial -->
+    @if (!isSuperAdmin) {
+      <div
+        class="relative z-10 rounded-xl border border-base-300/50 bg-base-100/50 p-6 backdrop-blur-sm"
+      >
+        <p class="text-base-content italic">
+          "Soma makes it easier for students to understand what
+          they're learning and gives teachers better insight into
+          their progress."
+        </p>
+
+        <div class="mt-4 flex items-center gap-3">
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20 font-semibold text-primary"
+          >
+            SM
+          </div>
+
+          <div>
+            <p class="font-medium text-base-content">
+              Sarah Mitchell
+            </p>
+
+            <p class="text-sm text-base-content/60">
+              Science Teacher
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Right side - Login -->
+  <div
+    class="flex w-full items-center justify-center p-6 lg:w-1/2"
+  >
+    <div
+      class="card w-full max-w-md border border-base-300/50 bg-base-200/80 backdrop-blur-sm"
+    >
+      <div class="card-body">
+
+        <!-- Mobile logo -->
+        <a
+          routerLink="/"
+          class="mb-4 flex items-center gap-2 lg:hidden"
+        >
+          <div
+            class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary"
+          >
+            <svg
+              lucideBookOpenIcon
+              class="h-5 w-5 text-primary-content"
+            ></svg>
+          </div>
+
+          <span class="text-xl font-semibold text-base-content">
+            Soma
+          </span>
+        </a>
+
+        <!-- Header -->
+        @if (isSuperAdmin) {
+          <h2
+            class="card-title text-2xl font-bold text-base-content"
+          >
+            Platform Admin
+          </h2>
+
+          <p class="mb-4 text-sm text-base-content/60">
+            Sign in to manage the Soma platform.
+          </p>
+        } @else {
+          <h2
+            class="card-title text-2xl font-bold text-base-content"
+          >
+            Welcome back
+          </h2>
+
+          <p class="mb-4 text-sm text-base-content/60">
+            Sign in to continue your learning journey.
+          </p>
+        }
+
+        <!-- Login form -->
+        <form
+          [formGroup]="loginForm"
+          (ngSubmit)="onSubmit()"
+          class="space-y-5"
+        >
+
+          <!-- Session expired -->
+          @if (sessionExpired && !errorMessage()) {
+            <div class="alert alert-warning text-sm">
+              <span>
+                You were signed out to keep your account safe.
+                Please sign in again.
+              </span>
+            </div>
+          }
+
+          <!-- Login error -->
+          @if (errorMessage()) {
+            <div
+              class="alert alert-error text-sm"
+              role="alert"
+            >
+              <span>{{ errorMessage() }}</span>
+            </div>
+          }
+
+          <!-- School code -->
+          @if (!isSuperAdmin) {
+            <div>
+              <label
+                class="label"
+                for="schoolCode"
+              >
+                <span class="label-text">
+                  School code
+                </span>
+              </label>
+
+              <input
+                id="schoolCode"
+                type="text"
+                formControlName="schoolCode"
+                placeholder="e.g. KISU-2712"
+                autocomplete="organization"
+                class="input input-bordered w-full uppercase"
+                [class.input-error]="schoolCodeInvalid"
+              />
+
+              @if (schoolCodeInvalid) {
+                <span class="mt-1 block text-xs text-error">
+                  School code is required
+                </span>
+              } @else {
+                <span
+                  class="mt-1 block text-xs text-base-content/40"
+                >
+                  Your school gave you this code when your account
+                  was created.
+                </span>
+              }
+            </div>
+          }
 
           <!-- Email -->
           <div>
-            <label class="label"><span class="label-text">Email address</span></label>
+            <label
+              class="label"
+              for="email"
+            >
+              <span class="label-text">
+                Email address
+              </span>
+            </label>
+
             <input
+              id="email"
               type="email"
               formControlName="email"
               placeholder="you@school.edu"
+              autocomplete="username"
               class="input input-bordered w-full"
               [class.input-error]="emailInvalid"
             />
+
             @if (emailInvalid) {
-              <span class="text-error text-xs mt-1 block">Valid email is required</span>
+              <span class="mt-1 block text-xs text-error">
+                Valid email is required
+              </span>
             }
           </div>
 
           <!-- Password -->
           <div>
-            <div class="flex items-center justify-between mb-1">
-              <label class="label py-0"><span class="label-text">Password</span></label>
-              <a routerLink="/forgot-password" class="text-sm text-primary hover:underline">
+            <div class="mb-1 flex items-center justify-between">
+              <label
+                class="label py-0"
+                for="password"
+              >
+                <span class="label-text">
+                  Password
+                </span>
+              </label>
+
+              <a
+                routerLink="/forgot-password"
+                class="text-sm text-primary hover:underline"
+              >
                 Forgot password?
               </a>
             </div>
+
             <div class="relative">
               <input
+                id="password"
                 [type]="showPassword() ? 'text' : 'password'"
                 formControlName="password"
                 placeholder="Enter your password"
+                autocomplete="current-password"
                 class="input input-bordered w-full pr-10"
                 [class.input-error]="passwordInvalid"
               />
+
               <button
                 type="button"
                 (click)="showPassword.set(!showPassword())"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content"
+                [attr.aria-label]="
+                  showPassword()
+                    ? 'Hide password'
+                    : 'Show password'
+                "
               >
-                <svg lucideIcon="showPassword() ? EyeOffIcon : EyeIcon" class="h-4 w-4"></svg>
+                @if (showPassword()) {
+                  <svg
+                    lucideEyeOff
+                    class="h-4 w-4"
+                  ></svg>
+                } @else {
+                  <svg
+                    lucideEye
+                    class="h-4 w-4"
+                  ></svg>
+                }
               </button>
             </div>
+
             @if (passwordInvalid) {
-              <span class="text-error text-xs mt-1 block">Password is required</span>
+              <span class="mt-1 block text-xs text-error">
+                Password is required
+              </span>
             }
           </div>
 
           <!-- Remember me -->
-          <div class="flex items-center gap-2">
-            <input
-              type="checkbox"
-              formControlName="rememberMe"
-              class="checkbox checkbox-primary checkbox-sm"
-            />
-            <span class="text-sm text-base-content/60 cursor-pointer">Remember me for 30 days</span>
-          </div>
+          @if (!isSuperAdmin) {
+            <div class="flex items-center gap-2">
+              <input
+                id="rememberMe"
+                type="checkbox"
+                class="checkbox checkbox-primary checkbox-sm"
+              />
+
+              <label
+                for="rememberMe"
+                class="cursor-pointer text-sm text-base-content/60"
+              >
+                Remember me for 30 days
+              </label>
+            </div>
+          }
 
           <!-- Submit -->
           <button
@@ -197,18 +345,31 @@
             [disabled]="isLoading()"
           >
             @if (isLoading()) {
-              <span class="loading loading-spinner loading-sm"></span>
+              <span
+                class="loading loading-spinner loading-sm"
+              ></span>
+
               Signing in...
             } @else {
-              Sign In
+              Sign in
             }
           </button>
 
-          <!-- Sign up link -->
-          <p class="text-center text-sm text-base-content/60">
-            Don't have an account?
-            <a routerLink="/signup" class="font-medium text-primary hover:underline ml-1">Sign up</a>
-          </p>
+          <!-- Sign up -->
+          @if (!isSuperAdmin) {
+            <p
+              class="text-center text-sm text-base-content/60"
+            >
+              Don't have an account?
+
+              <a
+                routerLink="/signup"
+                class="ml-1 font-medium text-primary hover:underline"
+              >
+                Sign up
+              </a>
+            </p>
+          }
 
         </form>
       </div>

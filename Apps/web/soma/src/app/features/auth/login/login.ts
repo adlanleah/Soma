@@ -1,138 +1,169 @@
-import { Component, signal, inject } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
-  LucideDynamicIcon,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
   LucideBookOpen,
-  LucideGraduationCap,
-  LucideUsers,
-  LucideShield,
-  LucideBuilding2,
   LucideEye,
   LucideEyeOff,
-  type LucideIconInput,
 } from '@lucide/angular';
-
-type UserRole = 'teacher' | 'student' | 'parent' | 'admin' | 'superadmin';
-
-interface RoleConfig {
-  label: string;
-  icon: LucideIconInput;
-  description: string;
-}
-
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [RouterLink, ReactiveFormsModule, LucideDynamicIcon],
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    LucideEye,
+    LucideEyeOff
+],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
-   private router = inject(Router);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
+  // Platform Super Admin login
+  readonly isSuperAdmin =
+    this.route.snapshot.data['superAdmin'] === true;
+
+  readonly sessionExpired =
+    this.route.snapshot.queryParamMap.get('expired') === '1';
 
   // Icons
   readonly BookOpenIcon = LucideBookOpen;
-  readonly GraduationCapIcon = LucideGraduationCap;
-  readonly UsersIcon = LucideUsers;
-  readonly ShieldIcon = LucideShield;
-  readonly Building2Icon = LucideBuilding2;
   readonly EyeIcon = LucideEye;
   readonly EyeOffIcon = LucideEyeOff;
 
-  // State signals
-  selectedRole = signal<UserRole>('student');
+  // UI state
   showPassword = signal(false);
   isLoading = signal(false);
-  showAdminOptions = signal(false);
+  errorMessage = signal<string | null>(null);
 
-  // Data
-  readonly mainRoles: UserRole[] = ['teacher', 'student', 'parent', 'admin'];
-  readonly adminRoles: UserRole[] = ['admin', 'superadmin'];
-
-  readonly roleConfig: Record<UserRole, RoleConfig> = {
-    teacher: {
-      label: 'Teacher',
-      icon: LucideBookOpen,
-      description: 'Create and manage lessons',
-    },
-    student: {
-      label: 'Student',
-      icon: LucideGraduationCap,
-      description: 'Access your learning portal',
-    },
-    parent: {
-      label: 'Parent',
-      icon: LucideUsers,
-      description: "Monitor your child's progress",
-    },
-    admin: {
-      label: 'Admin',
-      icon: LucideShield,
-      description: 'Manage school operations',
-    },
-    superadmin: {
-      label: 'Super Admin',
-      icon: LucideBuilding2,
-      description: 'Platform administration',
-    },
-  };
-
-  readonly roleRoutes: Record<UserRole, string> = {
-    teacher: '/teacher',
-    student: '/student',
-    parent: '/parent',
-    admin: '/admin',
-    superadmin: '/superadmin',
-  };
-
+  // Statistics displayed on the branding panel
   readonly stats = [
     { value: '500+', label: 'Schools' },
     { value: '50K+', label: 'Students' },
     { value: '10K+', label: 'Lessons Created' },
   ];
 
-  // Reactive Form
+  // Login form
   loginForm = new FormGroup({
-    email: new FormControl('demo@uglearner.app', [Validators.required, Validators.email]),
-    password: new FormControl('password123', [Validators.required]),
-    rememberMe: new FormControl(false),
+    schoolCode: new FormControl(
+      '',
+      this.isSuperAdmin ? [] : [Validators.required],
+    ),
+
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email,
+    ]),
+
+    password: new FormControl('', [
+      Validators.required,
+    ]),
   });
 
-  // Getters
+  // Validation helpers
+  get schoolCodeInvalid(): boolean {
+    const control = this.loginForm.get('schoolCode');
+
+    return !!(
+      control?.invalid &&
+      control?.touched
+    );
+  }
+
   get emailInvalid(): boolean {
-    const c = this.loginForm.get('email');
-    return !!(c?.invalid && c?.touched);
+    const control = this.loginForm.get('email');
+
+    return !!(
+      control?.invalid &&
+      control?.touched
+    );
   }
 
   get passwordInvalid(): boolean {
-    const c = this.loginForm.get('password');
-    return !!(c?.invalid && c?.touched);
+    const control = this.loginForm.get('password');
+
+    return !!(
+      control?.invalid &&
+      control?.touched
+    );
   }
 
-  // Methods
-  selectRole(role: UserRole): void {
-    this.selectedRole.set(role);
-  }
-
-  toggleAdminOptions(): void {
-    const isAdminSelected = this.selectedRole() === 'admin' || this.selectedRole() === 'superadmin';
-    if (isAdminSelected) {
-      this.selectedRole.set('student');
-      this.showAdminOptions.set(false);
-    } else {
-      this.showAdminOptions.set(!this.showAdminOptions());
-    }
-  }
-
+  // Login
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
+
     this.isLoading.set(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    this.isLoading.set(false);
-    this.router.navigate([this.roleRoutes[this.selectedRole()]]);
+    this.errorMessage.set(null);
+
+    const {
+      schoolCode,
+      email,
+      password,
+    } = this.loginForm.getRawValue();
+
+    try {
+      if (this.isSuperAdmin) {
+        // Super Admin does NOT use a school code.
+        await this.auth.superAdminLogin(
+          email!.trim().toLowerCase(),
+          password!,
+        );
+      } else {
+        // Normal school users must provide a school code.
+        await this.auth.login(
+          schoolCode!.trim().toUpperCase(),
+          email!.trim().toLowerCase(),
+          password!,
+        );
+      }
+
+      // AuthService determines the destination from
+      // the authenticated user's actual backend role.
+      await this.router.navigateByUrl(
+        this.auth.homeRoute(),
+      );
+    } catch (err: unknown) {
+      this.errorMessage.set(
+        this.toMessage(err),
+      );
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private toMessage(err: unknown): string {
+    if (err instanceof HttpErrorResponse) {
+      if (err.status === 429) {
+        return 'Too many attempts. Please wait a minute and try again.';
+      }
+
+      if (err.status === 401) {
+        if (this.isSuperAdmin) {
+          return 'The email or password is incorrect. Please check your details and try again.';
+        }
+
+        return "That school code, email or password isn't right. Please check them and try again.";
+      }
+
+      if (err.status === 0) {
+        return "We can't reach Soma right now. Check your internet connection and try again.";
+      }
+    }
+
+    return 'Something went wrong on our side. Please try again in a moment.';
   }
 }
