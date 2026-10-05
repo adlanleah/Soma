@@ -1,3 +1,96 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
 
-@import 'tailwindcss';
+:root {
+  /* Soma Brand Colors */
+  --color-soma-navy: #0D1B2A;
+  --color-soma-teal: #00C9A7;
+
+  /* Soma Neutral Colors */
+  --color-soma-white: #FFFFFF;
+  --color-soma-background: #F7F9FA;
+  --color-soma-surface: #FFFFFF;
+  --color-soma-border: #E2E8EC;
+
+  /* Soma Dark Surfaces */
+  --color-soma-dark-100: #0D1B2A;
+  --color-soma-dark-200: #112536;
+  --color-soma-dark-300: #193247;
+
+  /* Soma light theme */
+  color-scheme: light;
+  --color-base-100: #F7F9FA;
+  --color-base-200: #EEF2F4;
+  --color-base-300: #E2E8EC;
+  --color-base-content: #0D1B2A;
+  --color-primary: #00C9A7;
+  --color-primary-content: #0D1B2A;
+  --color-secondary: #0D1B2A;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #00C9A7;
+  --color-accent-content: #0D1B2A;
+  --color-neutral: #0D1B2A;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #00AFC0;
+  --color-info-content: #FFFFFF;
+  --color-success: #00C9A7;
+  --color-success-content: #0D1B2A;
+  --color-warning: #E9A23B;
+  --color-warning-content: #0D1B2A;
+  --color-error: #D94A4A;
+  --color-error-content: #FFFFFF;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.625rem;
+  --radius-box: 0.875rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+[data-theme="soma-dark"] {
+  color-scheme: dark;
+  --color-base-100: #0D1B2A;
+  --color-base-200: #112536;
+  --color-base-300: #193247;
+  --color-base-content: #FFFFFF;
+  --color-primary: #00C9A7;
+  --color-primary-content: #0D1B2A;
+  --color-secondary: #193247;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #00C9A7;
+  --color-accent-content: #0D1B2A;
+  --color-neutral: #07131F;
+  --color-neutral-content: #FFFFFF;
+  --color-info: #29C7D9;
+  --color-info-content: #0D1B2A;
+  --color-success: #00C9A7;
+  --color-success-content: #0D1B2A;
+  --color-warning: #F0B84B;
+  --color-warning-content: #0D1B2A;
+  --color-error: #F06A6A;
+  --color-error-content: #0D1B2A;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.625rem;
+  --radius-box: 0.875rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* =========================================================
+   GLOBAL SOMA STYLING
+   ========================================================= */
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background-color: var(--color-base-100);
+  color: var(--color-base-content);
+}
