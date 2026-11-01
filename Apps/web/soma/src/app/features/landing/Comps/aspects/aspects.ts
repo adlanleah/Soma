@@ -21,12 +21,12 @@ interface Feature {
 }
 
 @Component({
-  selector: 'app-features',
   imports: [LucideDynamicIcon],
-  templateUrl: './features.html',
-  styleUrl: './features.css',
+  selector: 'app-aspects',
+  styleUrl: './aspects.css',
+  templateUrl: './aspects.html',
 })
-export class FeaturesComponent {
+export class Aspects {
   readonly features = signal<Feature[]>([
     {
       icon: LucideSparkles,

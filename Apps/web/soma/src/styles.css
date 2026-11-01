@@ -1,96 +1,384 @@
+
 @import "tailwindcss";
+@import "@fontsource-variable/montserrat";
 
-:root {
-  /* Soma Brand Colors */
-  --color-soma-navy: #0D1B2A;
-  --color-soma-teal: #00C9A7;
-
-  /* Soma Neutral Colors */
-  --color-soma-white: #FFFFFF;
-  --color-soma-background: #F7F9FA;
-  --color-soma-surface: #FFFFFF;
-  --color-soma-border: #E2E8EC;
-
-  /* Soma Dark Surfaces */
-  --color-soma-dark-100: #0D1B2A;
-  --color-soma-dark-200: #112536;
-  --color-soma-dark-300: #193247;
-
-  /* Soma light theme */
-  color-scheme: light;
-  --color-base-100: #F7F9FA;
-  --color-base-200: #EEF2F4;
-  --color-base-300: #E2E8EC;
-  --color-base-content: #0D1B2A;
-  --color-primary: #00C9A7;
-  --color-primary-content: #0D1B2A;
-  --color-secondary: #0D1B2A;
-  --color-secondary-content: #FFFFFF;
-  --color-accent: #00C9A7;
-  --color-accent-content: #0D1B2A;
-  --color-neutral: #0D1B2A;
-  --color-neutral-content: #FFFFFF;
-  --color-info: #00AFC0;
-  --color-info-content: #FFFFFF;
-  --color-success: #00C9A7;
-  --color-success-content: #0D1B2A;
-  --color-warning: #E9A23B;
-  --color-warning-content: #0D1B2A;
-  --color-error: #D94A4A;
-  --color-error-content: #FFFFFF;
-  --radius-selector: 0.5rem;
-  --radius-field: 0.625rem;
-  --radius-box: 0.875rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 1px;
-  --depth: 0;
-  --noise: 0;
+@theme {
+  --font-sans: "Montserrat Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
-[data-theme="soma-dark"] {
-  color-scheme: dark;
-  --color-base-100: #0D1B2A;
-  --color-base-200: #112536;
-  --color-base-300: #193247;
-  --color-base-content: #FFFFFF;
+/* =========================================================
+   DAISYUI CONFIGURATION
+   ========================================================= */
+
+@plugin "daisyui" {
+  themes: soma-light --default, soma-dark;
+  logs: false;
+}
+
+/* =========================================================
+   SOMA LIGHT THEME
+   ========================================================= */
+
+@plugin "daisyui/theme" {
+  name: "soma-light";
+  default: true;
+  color-scheme: light;
+
+  /* Brand surfaces */
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F4F7F9;
+  --color-base-300: #E1E8ED;
+  --color-base-content: #0D1B2A;
+
+  /* Primary brand */
   --color-primary: #00C9A7;
   --color-primary-content: #0D1B2A;
-  --color-secondary: #193247;
+
+  /* Secondary */
+  --color-secondary: #0D1B2A;
   --color-secondary-content: #FFFFFF;
-  --color-accent: #00C9A7;
-  --color-accent-content: #0D1B2A;
-  --color-neutral: #07131F;
-  --color-neutral-content: #FFFFFF;
-  --color-info: #29C7D9;
+
+  /* Accent */
+  --color-accent: #007A66;
+  --color-accent-content: #FFFFFF;
+
+  /* Neutral */
+  --color-neutral: #0D1B2A;
+  --color-neutral-content: #E6EEF3;
+
+  /* Status colours */
+  --color-info: #1A8FE3;
   --color-info-content: #0D1B2A;
-  --color-success: #00C9A7;
+
+  --color-success: #2DBE7E;
   --color-success-content: #0D1B2A;
-  --color-warning: #F0B84B;
+
+  --color-warning: #F5A623;
   --color-warning-content: #0D1B2A;
-  --color-error: #F06A6A;
-  --color-error-content: #0D1B2A;
-  --radius-selector: 0.5rem;
-  --radius-field: 0.625rem;
-  --radius-box: 0.875rem;
+
+  --color-error: #D63A40;
+  --color-error-content: #FFFFFF;
+
+  /* Shape and spacing */
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
+
   --border: 1px;
   --depth: 0;
   --noise: 0;
 }
 
 /* =========================================================
-   GLOBAL SOMA STYLING
+   SOMA DARK THEME
    ========================================================= */
 
-html,
-body {
-  margin: 0;
-  min-height: 100%;
+@plugin "daisyui/theme" {
+  name: "soma-dark";
+  color-scheme: dark;
+
+  /* Brand surfaces */
+  --color-base-100: #0D1B2A;
+  --color-base-200: #12263A;
+  --color-base-300: #1B3550;
+  --color-base-content: #E8F1F5;
+
+  /* Primary brand */
+  --color-primary: #00C9A7;
+  --color-primary-content: #0D1B2A;
+
+  /* Secondary */
+  --color-secondary: #1B3550;
+  --color-secondary-content: #E8F1F5;
+
+  /* Accent */
+  --color-accent: #3DE0C4;
+  --color-accent-content: #0D1B2A;
+
+  /* Neutral */
+  --color-neutral: #081420;
+  --color-neutral-content: #E8F1F5;
+
+  /* Status colours */
+  --color-info: #1A8FE3;
+  --color-info-content: #0D1B2A;
+
+  --color-success: #2DBE7E;
+  --color-success-content: #0D1B2A;
+
+  --color-warning: #F5A623;
+  --color-warning-content: #0D1B2A;
+
+  --color-error: #FF6B6B;
+  --color-error-content: #0D1B2A;
+
+  /* Shape and spacing */
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* =========================================================
+   GLOBAL SOMA STYLES
+   ========================================================= */
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
+  margin: 0;
+  min-height: 100vh;
   background-color: var(--color-base-100);
   color: var(--color-base-content);
+  font-family: "Montserrat Variable", ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Text selection */
+::selection {
+  background-color: #00C9A7;
+  color: #0D1B2A;
+}
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base-200);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #007A66;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00C9A7;
+}
+
+/* =========================================================
+   LINKS AND BUTTONS
+   ========================================================= */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+:focus-visible {
+  outline: 2px solid #00C9A7;
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   SOMA NAVIGATION LINKS
+   ========================================================= */
+
+.soma-nav-link {
+  position: relative;
+  display: inline-block;
+  color: var(--color-base-content);
+  opacity: 0.7;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    color 200ms ease,
+    opacity 200ms ease;
+}
+
+.soma-nav-link:hover {
+  color: #00C9A7;
+  opacity: 1;
+}
+
+.soma-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -7px;
+  width: 100%;
+  height: 2px;
+  background-color: #00C9A7;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 200ms ease;
+}
+
+.soma-nav-link:hover::after {
+  transform: scaleX(1);
+}
+
+.soma-nav-link:focus-visible {
+  color: #00C9A7;
+  opacity: 1;
+  outline: 2px solid #00C9A7;
+  outline-offset: 5px;
+  border-radius: 2px;
+}
+
+/* =========================================================
+   SOMA BRAND UTILITIES
+   ========================================================= */
+
+.soma-navy {
+  color: #0D1B2A;
+}
+
+.soma-teal {
+  color: #00C9A7;
+}
+
+.soma-deep-teal {
+  color: #007A66;
+}
+
+.bg-soma-navy {
+  background-color: #0D1B2A;
+}
+
+.bg-soma-teal {
+  background-color: #00C9A7;
+}
+
+.bg-soma-light {
+  background-color: #F4F7F9;
+}
+
+.text-soma-navy {
+  color: #0D1B2A;
+}
+
+.text-soma-teal {
+  color: #00C9A7;
+}
+
+.border-soma-teal {
+  border-color: #00C9A7;
+}
+
+/* =========================================================
+   SOMA GRADIENT
+   ========================================================= */
+
+.soma-gradient {
+  background: linear-gradient(
+    135deg,
+    #0D1B2A 0%,
+    #12263A 60%,
+    #007A66 100%
+  );
+}
+
+/* =========================================================
+   SOMA PRIMARY BUTTON
+   ========================================================= */
+
+.soma-button {
+  background-color: #00C9A7;
+  color: #0D1B2A;
+  border: 1px solid #00C9A7;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.soma-button:hover:not(:disabled) {
+  background-color: #00B596;
+  border-color: #00B596;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgb(0 201 167 / 18%);
+}
+
+.soma-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.soma-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   DAISYUI PRIMARY BUTTON OVERRIDES
+   ========================================================= */
+
+.btn-primary {
+  background-color: #00C9A7;
+  border-color: #00C9A7;
+  color: #0D1B2A;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background-color: #00B596;
+  border-color: #00B596;
+  color: #0D1B2A;
+}
+
+/* =========================================================
+   SECTION SCROLL OFFSET
+   ========================================================= */
+
+#aspects,
+#roles,
+#how {
+  scroll-margin-top: 6rem;
+}
+
+/* =========================================================
+   REDUCED MOTION ACCESSIBILITY
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }
