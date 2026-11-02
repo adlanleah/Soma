@@ -1,8 +1,10 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+
 import { MasterPrismaService } from '../../database/master-prisma/master-prisma.service';
 import { TenantConnectionService } from '../../database/tenant-connection/tenant-connection.service';
+
 import { LoginDto } from './dto/login.dto';
 import { SuperAdminLoginDto } from './dto/super-admin-login.dto';
 import { JwtPayload } from '../../common/interfaces/jwt-payload';
@@ -44,15 +46,17 @@ export class AuthService {
 
     // 4. Verify password
     const passwordValid = await bcrypt.compare(dto.password, user.passwordHash);
+
     if (!passwordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // 5. Check account status
     if (user.status !== 'active') {
       throw new UnauthorizedException('Account is not active yet');
     }
 
-    // 5. Build JWT payload
+    // 6. Build JWT payload
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
@@ -64,8 +68,13 @@ export class AuthService {
       tenancyMode: school.tenancyMode,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
 
     return {
       accessToken,
@@ -85,36 +94,22 @@ export class AuthService {
     };
   }
 
-  // async validateUserFromPayload(payload: JwtPayload) {
-  //   if (!payload.dbName) {
-  //     throw new UnauthorizedException('Invalid token payload');
-  //   }
-
-  //   const tenantClient = this.tenantConnection.getClient({
-  //     dbName: payload.dbName,
-  //   });
-
-  //   const user = await tenantClient.user.findUnique({
-  //     where: { id: payload.sub },
-  //   });
-
-  //   if (!user || user.status !== 'active') {
-  //     throw new UnauthorizedException('User no longer valid');
-  //   }
-
-  //   return payload;
-  // }
-
   async validateUserFromPayload(payload: JwtPayload) {
-    // Super Admins live in the master DB, not in any school's tenant DB
+    // Super admins live in the master DB
     if (payload.role === 'SUPER_ADMIN') {
       const superAdmin = await this.masterPrisma.superAdmin.findUnique({
         where: { id: payload.sub },
       });
-      if (!superAdmin) throw new UnauthorizedException('User no longer valid');
+
+      // Reject deleted or deactivated super admins
+      if (!superAdmin || superAdmin.status !== 'ACTIVE') {
+        throw new UnauthorizedException('User no longer valid');
+      }
+
       return payload;
     }
 
+    // School users must have tenant information
     if (!payload.dbName) {
       throw new UnauthorizedException('Invalid token payload');
     }
@@ -122,6 +117,7 @@ export class AuthService {
     const tenantClient = this.tenantConnection.getClient({
       dbName: payload.dbName,
     });
+
     const user = await tenantClient.user.findUnique({
       where: { id: payload.sub },
     });
@@ -129,16 +125,23 @@ export class AuthService {
     if (!user || user.status !== 'active') {
       throw new UnauthorizedException('User no longer valid');
     }
+
     return payload;
   }
 
   async getProfile(payload: JwtPayload) {
+    // Super admin profile
     if (payload.role === 'SUPER_ADMIN') {
       const sa = await this.masterPrisma.superAdmin.findUnique({
         where: { id: payload.sub },
       });
-      if (!sa) throw new UnauthorizedException();
+
+      if (!sa || sa.status !== 'ACTIVE') {
+        throw new UnauthorizedException('User no longer valid');
+      }
+
       const [firstName, ...rest] = sa.name.split(' ');
+
       return {
         user: {
           id: sa.id,
@@ -152,19 +155,27 @@ export class AuthService {
       };
     }
 
+    // School user profile
     const school = await this.masterPrisma.school.findUnique({
       where: { schoolCode: payload.schoolCode },
     });
-    if (!school || !school.dbName) throw new UnauthorizedException();
+
+    if (!school || school.status !== 'ACTIVE' || !school.dbName) {
+      throw new UnauthorizedException('School no longer valid');
+    }
 
     const tenantClient = this.tenantConnection.getClient({
       dbName: school.dbName,
     });
+
     const user = await tenantClient.user.findUnique({
       where: { id: payload.sub },
       include: { adminProfile: true },
     });
-    if (!user) throw new UnauthorizedException();
+
+    if (!user || user.status !== 'active') {
+      throw new UnauthorizedException('User no longer valid');
+    }
 
     return {
       user: {
@@ -175,40 +186,60 @@ export class AuthService {
         role: user.role,
         adminLevel: user.adminProfile?.adminLevel ?? null,
       },
-      school: { name: school.name, schoolCode: school.schoolCode },
+      school: {
+        name: school.name,
+        schoolCode: school.schoolCode,
+      },
     };
   }
 
+  // =========================================================
+  // SUPER ADMIN LOGIN
+  // =========================================================
+
   async superAdminLogin(dto: SuperAdminLoginDto) {
+    // 1. Find super admin in master DB
     const superAdmin = await this.masterPrisma.superAdmin.findUnique({
-      where: { email: dto.email },
+      where: {
+        email: dto.email.trim().toLowerCase(),
+      },
     });
 
     if (!superAdmin) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // 2. Verify password
     const passwordValid = await bcrypt.compare(
       dto.password,
       superAdmin.passwordHash,
     );
-    if (!passwordValid) {
+
+    if (!passwordValid || superAdmin.status !== 'ACTIVE') {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // 3. Build super admin JWT payload
     const payload: JwtPayload = {
       sub: superAdmin.id,
       email: superAdmin.email,
       role: 'SUPER_ADMIN',
-      schoolCode: '', // super admin isn't scoped to a school
+      schoolCode: '',
       schemaName: '',
       dbName: null,
       tenancyMode: 'DATABASE',
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    // 4. Generate tokens
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: '15m',
+    });
 
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: '7d',
+    });
+
+    // 5. Return authenticated super admin
     return {
       accessToken,
       refreshToken,

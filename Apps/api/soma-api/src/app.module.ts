@@ -28,6 +28,7 @@ import { MasterPrismaService } from './database/master-prisma/master-prisma.serv
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { SuperAdminModule } from './modules/super-admin/superadmin.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { RolesGuard } from './common/guards/roles.guard';
     FlagsModule,
     AiModule,
     HealthModule,
+    SuperAdminModule,
   ],
 
   controllers: [AppController],

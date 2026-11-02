@@ -19,6 +19,11 @@ enum SchoolStatus {
   SUSPENDED
 }
 
+enum SuperAdminStatus {
+  ACTIVE
+  DEACTIVATED
+}
+
 enum TenancyMode {
   SCHEMA   // small schools share the master DB, isolated by schema
   DATABASE // large schools get a fully separate database
@@ -56,11 +61,15 @@ model School {
 }
 
 model SuperAdmin {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id                 String           @id @default(uuid())
+  name               String
+  email              String           @unique
+  passwordHash       String           @map("password_hash")
+  isPrimary          Boolean          @default(false) @map("is_primary")
+  status             SuperAdminStatus @default(ACTIVE)
+  mustChangePassword Boolean          @default(false) @map("must_change_password")
+  createdBy          String?          @map("created_by")
+  createdAt          DateTime         @default(now()) @map("created_at")
 
   @@map("super_admins")
 }

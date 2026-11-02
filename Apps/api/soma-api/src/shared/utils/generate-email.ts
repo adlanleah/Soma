@@ -14,7 +14,7 @@ export function generateStudentCode(schoolEmailPrefix: string): string {
   return `${prefix}-STU-${num}`;
 }
 
-export function generateTempPassword(): string {
+export function generateTempPassword(p0: number): string {
   // Temporary password shown once — user resets it on first login
   return Math.random().toString(36).slice(-8) + '!A1';
 }
