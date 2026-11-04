@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { SchoolsService } from './schools.service';
 import { CreateSchoolDto } from './dto/create-school.dto';
@@ -17,5 +17,17 @@ export class SchoolsController {
   @Get()
   findAll() {
     return this.schoolsService.findAll();
+  }
+
+  @Get('dashboard/summary')
+  @Roles('SUPER_ADMIN')
+  getDashboardSummary() {
+    return this.schoolsService.getDashboardSummary();
+  }
+
+  @Post(':id/retry-provisioning')
+  @Roles('SUPER_ADMIN')
+  retryProvisioning(@Param('id') id: string) {
+    return this.schoolsService.retryProvisioning(id);
   }
 }

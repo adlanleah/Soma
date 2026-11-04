@@ -72,7 +72,7 @@ export class SchoolProvisionerService {
     this.logger.log(`Running tenant migrations for ${dbName}`);
 
     execSync(
-      `npx prisma db push --schema="${schemaPath}" --config="${configPath}" --accept-data-loss`,
+      `npx prisma db push --schema="${schemaPath}" --config="${configPath}"`,
       {
         env: {
           ...process.env,

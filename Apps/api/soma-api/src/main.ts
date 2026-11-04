@@ -18,6 +18,8 @@ async function bootstrap() {
 
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
 
@@ -31,6 +33,11 @@ async function bootstrap() {
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  await app.listen(process.env.PORT ?? 3000);
+  const port = Number(process.env.PORT) || 3000;
+
+  await app.listen(port);
+
+  console.log(`Soma API running at http://localhost:${port}`);
 }
+
 void bootstrap();
