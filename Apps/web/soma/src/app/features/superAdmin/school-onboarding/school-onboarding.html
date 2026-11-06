@@ -1,0 +1,615 @@
+<div class="min-h-screen bg-[#F4F7F9] text-[#0D1B2A]">
+
+  <!-- Header -->
+  <header class="border-b border-[#E1E8ED] bg-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 lg:px-8">
+      <a routerLink="/superadmin" class="flex items-center gap-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D1B2A] text-xl font-bold text-[#00C9A7]">
+          S
+        </div>
+        <div>
+          <p class="text-lg font-bold tracking-tight">Soma</p>
+          <p class="text-xs text-slate-500">Platform administration</p>
+        </div>
+      </a>
+
+      <a
+        routerLink="/superadmin"
+        class="text-sm font-semibold text-slate-500 transition hover:text-[#007A66]"
+      >
+        Back to dashboard
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-5 py-10 lg:px-8">
+
+    @if (result(); as registration) {
+
+      <!-- Successful registration -->
+      <section class="mx-auto max-w-2xl">
+
+        <div class="mb-8 text-center">
+          <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-[#DDF8F1] text-3xl text-[#007A66]">
+            ✓
+          </div>
+
+          <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[#007A66]">
+            Registration submitted
+          </p>
+
+          <h1 class="text-3xl font-bold tracking-tight">
+            {{ registration.name }}
+          </h1>
+
+          <p class="mt-3 text-slate-500">
+            The school registration and database provisioning request has been processed.
+          </p>
+        </div>
+
+        <div class="rounded-2xl border border-[#E1E8ED] bg-white p-6 shadow-sm sm:p-8">
+
+          <div class="mb-6 flex items-center justify-between">
+            <h2 class="text-lg font-bold">Registration details</h2>
+
+            <span
+              class="rounded-full px-3 py-1 text-xs font-bold"
+              [class.bg-emerald-100]="registration.status === 'ACTIVE'"
+              [class.text-emerald-800]="registration.status === 'ACTIVE'"
+              [class.bg-amber-100]="registration.status === 'PENDING'"
+              [class.text-amber-800]="registration.status === 'PENDING'"
+              [class.bg-red-100]="registration.status === 'SUSPENDED'"
+              [class.text-red-800]="registration.status === 'SUSPENDED'"
+            >
+              {{ registration.status }}
+            </span>
+          </div>
+
+          <div class="rounded-xl border border-[#BCEFE2] bg-[#F0FCF8] p-5">
+            <p class="text-xs font-bold uppercase tracking-wider text-[#007A66]">
+              Official school code
+            </p>
+
+            <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <p class="text-2xl font-bold tracking-wider text-[#0D1B2A]">
+                {{ registration.schoolCode }}
+              </p>
+
+              <button
+                type="button"
+                (click)="copySchoolCode()"
+                class="rounded-lg border border-[#BCEFE2] bg-white px-4 py-2 text-sm font-semibold text-[#007A66] transition hover:bg-[#DDF8F1]"
+              >
+                {{ copiedCode() ? 'Copied' : 'Copy code' }}
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 grid gap-5 sm:grid-cols-2">
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                School
+              </p>
+              <p class="mt-1 font-semibold">{{ registration.name }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Selected plan
+              </p>
+              <p class="mt-1 font-semibold">{{ registration.plan }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Principal
+              </p>
+              <p class="mt-1 font-semibold">{{ adminFullName }}</p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Principal's email
+              </p>
+              <p class="mt-1 break-all font-semibold">
+                {{ form.controls.adminEmail.value }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Tenancy
+              </p>
+              <p class="mt-1 font-semibold">
+                {{ registration.tenancyMode || 'DATABASE' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-7 rounded-xl bg-[#F4F7F9] p-4">
+            <p class="text-sm font-semibold text-[#0D1B2A]">
+              Principal account setup
+            </p>
+            <p class="mt-1 text-sm leading-6 text-slate-500">
+              The principal's email has been recorded. Their Soma login account
+              and activation invitation must be completed before they can sign in.
+            </p>
+          </div>
+
+          @if (registration.status === 'SUSPENDED') {
+            <div class="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              The school record exists, but database provisioning was unsuccessful.
+              Please resolve the provisioning issue before allowing access.
+            </div>
+          }
+
+          @if (errorMessage()) {
+            <p class="mt-4 text-sm text-red-600">{{ errorMessage() }}</p>
+          }
+
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              (click)="goToDashboard()"
+              class="flex-1 rounded-xl bg-[#0D1B2A] px-5 py-3 font-semibold text-white transition hover:bg-[#18334B]"
+            >
+              Return to dashboard
+            </button>
+
+            <button
+              type="button"
+              (click)="startAnotherRegistration()"
+              class="flex-1 rounded-xl border border-[#E1E8ED] bg-white px-5 py-3 font-semibold text-[#0D1B2A] transition hover:bg-[#F4F7F9]"
+            >
+              Register another school
+            </button>
+          </div>
+        </div>
+      </section>
+
+    } @else {
+
+      <!-- Page introduction -->
+      <div class="mb-9">
+        <p class="mb-2 text-sm font-bold uppercase tracking-[0.18em] text-[#007A66]">
+          School management
+        </p>
+
+        <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
+          Onboard a new school
+        </h1>
+
+        <p class="mt-3 max-w-2xl leading-7 text-slate-500">
+          Register a school on Soma, configure its subscription plan and
+          register its principal administrator.
+        </p>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-8 rounded-2xl border border-[#E1E8ED] bg-white p-5 sm:p-6">
+        <div class="grid grid-cols-3 gap-3">
+
+          <div>
+            <div class="mb-3 flex items-center gap-2">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                [class.bg-[#00C9A7]]="step() >= 1"
+                [class.text-[#0D1B2A]]="step() >= 1"
+                [class.bg-slate-100]="step() < 1"
+                [class.text-slate-400]="step() < 1"
+              >
+                1
+              </div>
+              <span class="hidden text-sm font-semibold sm:inline">School details</span>
+            </div>
+            <div class="h-1 rounded-full" [class.bg-[#00C9A7]]="step() >= 1" [class.bg-slate-100]="step() < 1"></div>
+          </div>
+
+          <div>
+            <div class="mb-3 flex items-center gap-2">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                [class.bg-[#00C9A7]]="step() >= 2"
+                [class.text-[#0D1B2A]]="step() >= 2"
+                [class.bg-slate-100]="step() < 2"
+                [class.text-slate-400]="step() < 2"
+              >
+                2
+              </div>
+              <span class="hidden text-sm font-semibold sm:inline">Principal details</span>
+            </div>
+            <div class="h-1 rounded-full" [class.bg-[#00C9A7]]="step() >= 2" [class.bg-slate-100]="step() < 2"></div>
+          </div>
+
+          <div>
+            <div class="mb-3 flex items-center gap-2">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                [class.bg-[#00C9A7]]="step() >= 3"
+                [class.text-[#0D1B2A]]="step() >= 3"
+                [class.bg-slate-100]="step() < 3"
+                [class.text-slate-400]="step() < 3"
+              >
+                3
+              </div>
+              <span class="hidden text-sm font-semibold sm:inline">Review</span>
+            </div>
+            <div class="h-1 rounded-full" [class.bg-[#00C9A7]]="step() >= 3" [class.bg-slate-100]="step() < 3"></div>
+          </div>
+
+        </div>
+
+        <p class="mt-4 text-sm text-slate-500">
+          Step {{ step() }} of 3
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="submitOnboarding()">
+
+        <div class="rounded-2xl border border-[#E1E8ED] bg-white p-6 shadow-sm sm:p-8">
+
+          @if (step() === 1) {
+
+            <!-- Step 1: School information -->
+            <div class="mb-7">
+              <h2 class="text-xl font-bold">School information</h2>
+              <p class="mt-2 text-sm text-slate-500">
+                Enter the institution's official details.
+              </p>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+
+              <div class="sm:col-span-2">
+                <label for="schoolName" class="mb-2 block text-sm font-semibold">
+                  School name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="schoolName"
+                  type="text"
+                  formControlName="name"
+                  placeholder="e.g. Greenhill Academy"
+                  class="w-full rounded-xl border border-[#E1E8ED] bg-white px-4 py-3 outline-none transition focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+                @if (form.controls.name.touched && form.controls.name.invalid) {
+                  <p class="mt-1 text-xs text-red-600">
+                    Enter a school name with at least 3 characters.
+                  </p>
+                }
+              </div>
+
+              <div>
+                <label for="country" class="mb-2 block text-sm font-semibold">
+                  Country <span class="text-red-500">*</span>
+                </label>
+                <select
+                  id="country"
+                  formControlName="country"
+                  class="w-full rounded-xl border border-[#E1E8ED] bg-white px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                >
+                  @for (country of countries; track country) {
+                    <option [value]="country">{{ country }}</option>
+                  }
+                </select>
+              </div>
+
+              <div>
+                <label for="city" class="mb-2 block text-sm font-semibold">
+                  City / District <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="city"
+                  type="text"
+                  formControlName="city"
+                  placeholder="e.g. Kampala"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+                @if (form.controls.city.touched && form.controls.city.invalid) {
+                  <p class="mt-1 text-xs text-red-600">Enter the school's city or district.</p>
+                }
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="address" class="mb-2 block text-sm font-semibold">
+                  Physical address <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="address"
+                  type="text"
+                  formControlName="address"
+                  placeholder="Street, area or postal address"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+              <div>
+                <label for="phone" class="mb-2 block text-sm font-semibold">
+                  School phone number <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  formControlName="phone"
+                  placeholder="+256..."
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+              <div>
+                <label for="website" class="mb-2 block text-sm font-semibold">
+                  School website
+                  <span class="font-normal text-slate-400">(Optional)</span>
+                </label>
+                <input
+                  id="website"
+                  type="url"
+                  formControlName="website"
+                  placeholder="https://school.example"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+            </div>
+
+          } @else if (step() === 2) {
+
+            <!-- Step 2: Principal information -->
+            <div class="mb-7">
+              <h2 class="text-xl font-bold">Principal administrator</h2>
+              <p class="mt-2 text-sm text-slate-500">
+                Register the person responsible for administering this school's Soma account.
+              </p>
+            </div>
+
+            <div class="mb-6 rounded-xl border border-[#BCEFE2] bg-[#F0FCF8] p-4">
+              <p class="text-sm font-semibold text-[#007A66]">
+                School-owned email addresses
+              </p>
+              <p class="mt-1 text-sm leading-6 text-slate-600">
+                Enter the principal's existing email address. Soma does not
+                create or charge for school email accounts.
+              </p>
+            </div>
+
+            <div class="grid gap-5 sm:grid-cols-2">
+
+              <div>
+                <label for="adminFirstName" class="mb-2 block text-sm font-semibold">
+                  First name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="adminFirstName"
+                  type="text"
+                  formControlName="adminFirstName"
+                  placeholder="First name"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+              <div>
+                <label for="adminLastName" class="mb-2 block text-sm font-semibold">
+                  Last name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="adminLastName"
+                  type="text"
+                  formControlName="adminLastName"
+                  placeholder="Last name"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="adminEmail" class="mb-2 block text-sm font-semibold">
+                  Principal's email address <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="adminEmail"
+                  type="email"
+                  formControlName="adminEmail"
+                  placeholder="principal@school-domain.ac.ug"
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+                @if (form.controls.adminEmail.touched && form.controls.adminEmail.invalid) {
+                  <p class="mt-1 text-xs text-red-600">
+                    Enter a valid email address.
+                  </p>
+                }
+              </div>
+
+              <div class="sm:col-span-2">
+                <label for="adminPhone" class="mb-2 block text-sm font-semibold">
+                  Principal's phone number <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="adminPhone"
+                  type="tel"
+                  formControlName="adminPhone"
+                  placeholder="+256..."
+                  class="w-full rounded-xl border border-[#E1E8ED] px-4 py-3 outline-none focus:border-[#00C9A7] focus:ring-2 focus:ring-[#00C9A7]/20"
+                />
+              </div>
+
+            </div>
+
+          } @else {
+
+            <!-- Step 3: Review -->
+            <div class="mb-7">
+              <h2 class="text-xl font-bold">Review school registration</h2>
+              <p class="mt-2 text-sm text-slate-500">
+                Check the information below before submitting the registration.
+              </p>
+            </div>
+
+            <div class="space-y-6">
+
+              <section>
+                <div class="mb-3 flex items-center justify-between">
+                  <h3 class="font-bold">School details</h3>
+                  <button
+                    type="button"
+                    (click)="step.set(1)"
+                    class="text-sm font-semibold text-[#007A66] hover:underline"
+                  >
+                    Edit
+                  </button>
+                </div>
+
+                <div class="grid gap-4 rounded-xl bg-[#F4F7F9] p-4 sm:grid-cols-2">
+                  <div>
+                    <p class="text-xs text-slate-400">School name</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.name.value }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">Country</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.country.value }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">City / District</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.city.value }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">Phone</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.phone.value }}</p>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <p class="text-xs text-slate-400">Address</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.address.value }}</p>
+                  </div>
+                  @if (form.controls.website.value) {
+                    <div class="sm:col-span-2">
+                      <p class="text-xs text-slate-400">Website</p>
+                      <p class="mt-1 break-all font-semibold">{{ form.controls.website.value }}</p>
+                    </div>
+                  }
+                </div>
+              </section>
+
+              <section>
+                <div class="mb-3 flex items-center justify-between">
+                  <h3 class="font-bold">Principal details</h3>
+                  <button
+                    type="button"
+                    (click)="step.set(2)"
+                    class="text-sm font-semibold text-[#007A66] hover:underline"
+                  >
+                    Edit
+                  </button>
+                </div>
+
+                <div class="grid gap-4 rounded-xl bg-[#F4F7F9] p-4 sm:grid-cols-2">
+                  <div>
+                    <p class="text-xs text-slate-400">Principal</p>
+                    <p class="mt-1 font-semibold">{{ adminFullName }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">Email address</p>
+                    <p class="mt-1 break-all font-semibold">{{ form.controls.adminEmail.value }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">Phone</p>
+                    <p class="mt-1 font-semibold">{{ form.controls.adminPhone.value }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs text-slate-400">Role</p>
+                    <p class="mt-1 font-semibold">Principal administrator</p>
+                  </div>
+                </div>
+              </section>
+
+              <section>
+                <h3 class="mb-3 font-bold">Subscription plan</h3>
+
+                <div class="rounded-xl border border-[#BCEFE2] bg-[#F0FCF8] p-4">
+                  <p class="font-bold text-[#007A66]">{{ selectedPlan.name }}</p>
+                  <p class="mt-1 text-sm text-slate-600">{{ selectedPlan.description }}</p>
+                  <ul class="mt-3 space-y-2">
+                    @for (feature of selectedPlan.features; track feature) {
+                      <li class="flex items-center gap-2 text-sm text-slate-600">
+                        <span class="font-bold text-[#007A66]">✓</span>
+                        {{ feature }}
+                      </li>
+                    }
+                  </ul>
+                </div>
+              </section>
+
+              <section>
+                <h3 class="mb-3 font-bold">Choose subscription plan</h3>
+
+                <div class="grid gap-3 md:grid-cols-3">
+                  @for (plan of plans; track plan.value) {
+                    <button
+                      type="button"
+                      (click)="selectPlan(plan.value)"
+                      class="rounded-xl border p-4 text-left transition"
+                      [class.border-[#00C9A7]]="form.controls.plan.value === plan.value"
+                      [class.bg-[#F0FCF8]]="form.controls.plan.value === plan.value"
+                      [class.border-[#E1E8ED]]="form.controls.plan.value !== plan.value"
+                      [class.bg-white]="form.controls.plan.value !== plan.value"
+                    >
+                      <span class="font-bold">{{ plan.name }}</span>
+                      <span class="mt-2 block text-xs leading-5 text-slate-500">
+                        {{ plan.description }}
+                      </span>
+                      @if (form.controls.plan.value === plan.value) {
+                        <span class="mt-3 inline-block text-xs font-bold text-[#007A66]">
+                          Selected
+                        </span>
+                      }
+                    </button>
+                  }
+                </div>
+              </section>
+
+            </div>
+          }
+
+          <!-- Error -->
+          @if (errorMessage()) {
+            <div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <!-- Navigation -->
+          <div class="mt-9 flex flex-col-reverse gap-3 border-t border-[#E1E8ED] pt-6 sm:flex-row sm:items-center sm:justify-between">
+
+            <button
+              type="button"
+              (click)="previousStep()"
+              [disabled]="step() === 1 || isSubmitting()"
+              class="rounded-xl border border-[#E1E8ED] px-5 py-3 font-semibold text-slate-600 transition hover:bg-[#F4F7F9] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Back
+            </button>
+
+            @if (step() !== 3) {
+              <button
+                type="button"
+                (click)="nextStep()"
+                class="rounded-xl bg-[#0D1B2A] px-7 py-3 font-semibold text-white transition hover:bg-[#18334B]"
+              >
+                Continue
+              </button>
+            } @else {
+              <button
+                type="submit"
+                [disabled]="isSubmitting()"
+                class="rounded-xl bg-[#00C9A7] px-7 py-3 font-bold text-[#0D1B2A] transition hover:bg-[#00B795] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {{ isSubmitting() ? 'Registering school...' : 'Register school' }}
+              </button>
+            }
+
+          </div>
+
+        </div>
+      </form>
+    }
+
+  </main>
+</div>

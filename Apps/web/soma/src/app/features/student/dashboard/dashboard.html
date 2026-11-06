@@ -1,0 +1,105 @@
+<div class="flex flex-col min-h-screen bg-base-100 text-base-content">
+  <header class="p-6 border-b border-base-300">
+    <h1 class="text-3xl font-bold">Welcome back, Student</h1>
+    <p class="text-base-content/60">Keep up the great work! Here's your learning journey.</p>
+  </header>
+
+  <div class="flex-1 space-y-6 p-6">
+    <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      @for (stat of stats(); track stat.title) {
+        <div class="card bg-base-200 border border-base-300/50 shadow-sm">
+          <div class="card-body p-6 flex-row items-center justify-between">
+            <div>
+              <p class="text-xs uppercase tracking-wider text-base-content/50">{{stat.title}}</p>
+              <p class="text-3xl font-bold">{{stat.value}}</p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-xl" [class]="stat.bgColor">
+            <svg [lucideIcon]="stat.icon" [class]="'h-6 w-6 ' + stat.color"></svg>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div class="card bg-base-200 border border-base-300 lg:col-span-2">
+        <div class="p-6 flex items-center justify-between border-b border-base-300/30">
+          <div>
+            <h2 class="card-title">My Lessons</h2>
+            <p class="text-sm text-base-content/50">Continue where you left off</p>
+          </div>
+          <button class="btn btn-ghost btn-sm gap-1" routerLink="/student/lessons">
+            View all <svg lucideArrowRight class="h-4 w-4"></svg>
+          </button>
+        </div>
+        
+        <div class="p-6 space-y-4">
+          @for (lesson of assignedLessons(); track lesson.id) {
+            <div class="group flex items-center justify-between p-4 bg-base-100 rounded-xl border border-base-300 transition-all hover:border-primary/50">
+              <div class="flex items-center gap-4">
+                <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  @if (lesson.type === 'video') { <svg lucideVideo class="h-6 w-6"></svg> }
+                  @else if (lesson.type === 'quiz') { <svg lucideFileText class="h-6 w-6"></svg> }
+                  @else { <svg lucideBookOpen class="h-6 w-6"></svg> }
+                </div>
+                <div>
+                  <p class="font-bold">{{lesson.title}}</p>
+                  <p class="text-xs text-base-content/50">{{lesson.subject}}</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-4">
+                <div class="text-right hidden sm:block">
+                  <span class="text-xs text-base-content/40 flex items-center gap-1 justify-end">
+                    <svg lucideClock class="h-3 w-3"></svg> {{lesson.dueDate}}
+                  </span>
+                  @if (lesson.progress > 0) {
+                    <progress class="progress progress-primary w-20 h-1.5 mt-1" [value]="lesson.progress" max="100"></progress>
+                  }
+                </div>
+                <button class="btn btn-primary btn-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                  {{lesson.progress > 0 ? 'Continue' : 'Start'}}
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="card bg-base-200 border border-base-300">
+        <div class="card-body">
+          <h2 class="card-title text-sm uppercase tracking-widest text-base-content/50 mb-4">Activity History</h2>
+          <div class="space-y-6">
+            @for (item of recentActivity(); track item.id) {
+              <div class="flex gap-4">
+                <div class="h-2 w-2 mt-2 rounded-full bg-primary shadow-[0_0_8px_var(--color-primary)]"></div>
+                <div>
+                  <p class="text-sm font-medium">{{item.title}}</p>
+                  <div class="flex gap-2 items-center mt-1">
+                    @if (item.score) { <span class="text-xs text-accent font-bold">{{item.score}}</span> }
+                    <span class="text-[10px] text-base-content/40">{{item.time}}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card bg-accent/10 border border-accent/20">
+      <div class="card-body flex-row items-center gap-6">
+        <div class="bg-accent/20 p-4 rounded-2xl text-accent hidden md:flex">
+          <svg lucideMessageSquare class="h-8 w-8"></svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-xl font-bold">Stuck on a problem?</h3>
+          <p class="text-base-content/70">Chat with your AI tutor for instant, personalized help.</p>
+        </div>
+        <button class="btn bg-accent text-white hover:bg-accent/80 border-none px-8" routerLink="/student/ai-tutor">
+          Ask AI
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

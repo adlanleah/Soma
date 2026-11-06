@@ -28,7 +28,7 @@
               [class.bg-base-200]="activeRole().id !== role.id"
               [class.text-base-content]="activeRole().id !== role.id"
               [class.hover:bg-base-300]="activeRole().id !== role.id"
-              (click)="activeRole.set(role)"
+              (click)="setActiveRole(role)"
             >
               {{ role.title }}
             </button>

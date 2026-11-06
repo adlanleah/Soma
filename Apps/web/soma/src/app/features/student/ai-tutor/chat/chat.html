@@ -1,1 +1,119 @@
-<p>chat works!</p>
+<div class="flex h-screen flex-col">
+
+  <!-- Header -->
+  <div class="border-b border-base-300 bg-base-200 px-6 py-4">
+    <h1 class="text-xl font-bold text-base-content">AI Tutor</h1>
+    <p class="text-sm text-base-content/60">Get help understanding your lessons</p>
+  </div>
+
+  <!-- Chat area -->
+  <div class="flex flex-1 overflow-hidden p-6">
+    <div class="mx-auto flex w-full max-w-4xl flex-col">
+
+      <div class="card bg-base-200 border border-base-300 flex flex-1 flex-col overflow-hidden">
+
+        <!-- Messages -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="space-y-6">
+
+            @for (message of messages(); track message.id) {
+              <div
+                class="flex gap-3"
+                [class.flex-row-reverse]="message.role === 'user'"
+              >
+                <!-- Avatar -->
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+                  [class.bg-primary]="message.role === 'user'"
+                  [class.text-primary-content]="message.role === 'user'"
+                  [class.bg-accent/20]="message.role === 'assistant'"
+                  [class.text-accent]="message.role === 'assistant'"
+                >
+                  @if (message.role === 'user') {
+                    <svg lucideUser class="h-5 w-5"></svg>
+                  } @else {
+                    <svg lucideSparkles class="h-5 w-5"></svg>
+                  }
+                </div>
+
+                <!-- Bubble -->
+                <div
+                  class="max-w-[80%] rounded-2xl px-4 py-3"
+                  [class.bg-primary]="message.role === 'user'"
+                  [class.text-primary-content]="message.role === 'user'"
+                  [class.bg-base-300]="message.role === 'assistant'"
+                  [class.text-base-content]="message.role === 'assistant'"
+                >
+                  <p class="whitespace-pre-wrap text-sm">{{ message.content }}</p>
+                </div>
+              </div>
+            }
+
+            <!-- Typing indicator -->
+            @if (isTyping()) {
+              <div class="flex gap-3">
+                <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent/20 text-accent">
+                  <svg lucideSparkles class="h-5 w-5"></svg>
+                </div>
+                <div class="rounded-2xl bg-base-300 px-4 py-3">
+                  <div class="flex gap-1 items-center h-4">
+                    <span class="h-2 w-2 animate-bounce rounded-full bg-base-content/40" style="animation-delay: 0ms"></span>
+                    <span class="h-2 w-2 animate-bounce rounded-full bg-base-content/40" style="animation-delay: 150ms"></span>
+                    <span class="h-2 w-2 animate-bounce rounded-full bg-base-content/40" style="animation-delay: 300ms"></span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Scroll anchor -->
+            <div #messagesEnd></div>
+          </div>
+        </div>
+
+        <!-- Suggested questions -->
+        @if (showSuggestions) {
+          <div class="border-t border-base-300 px-6 py-4">
+            <p class="mb-3 text-sm text-base-content/60">Try asking:</p>
+            <div class="flex flex-wrap gap-2">
+              @for (question of suggestedQuestions; track question) {
+                <button
+                  (click)="handleSend(question)"
+                  class="rounded-full border border-base-300 bg-base-300/50 px-3 py-1.5 text-sm text-base-content transition-colors hover:bg-base-300"
+                >
+                  {{ question }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Input bar -->
+        <div class="border-t border-base-300 p-4">
+          <div class="flex gap-2">
+            <input
+              type="text"
+              [ngModel]="input()"
+              (ngModelChange)="input.set($event)"
+              (keydown)="handleKeyDown($event)"
+              placeholder="Ask me anything about your lessons..."
+              class="input input-bordered flex-1"
+              [disabled]="isTyping()"
+            />
+            <button
+              class="btn btn-primary btn-square"
+              (click)="handleSend()"
+              [disabled]="!input().trim() || isTyping()"
+            >
+              <svg lucideSend class="h-4 w-4"></svg>
+            </button>
+          </div>
+          <p class="mt-2 text-center text-xs text-base-content/40">
+            AI responses are based on your curriculum content and tailored to your learning level.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
